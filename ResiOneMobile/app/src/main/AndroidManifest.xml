@@ -12,6 +12,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ResiOneMobile">
         <activity
+            android:name="Reservas.ReservarEspacio"
+            android:exported="true"
+            android:label="@string/title_activity_reservar_espacio"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name="Reportes.CrearReporte"
+            android:exported="true"
+            android:label="@string/title_activity_crear_reporte"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.ResiOneMobile">

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="espacios_array">
+        <item>Espacio 1</item>
+        <item>Espacio 2</item>
+        <item>Espacio 3</item>
+    </string-array>
+    <string-array name="incidencias_array">
+        <item>Vandalismo</item>
+        <item>Ruido</item>
+        <item>Fuga de agua</item>
+        <item>Falla eléctrica</item>
+    </string-array>
+</resources>

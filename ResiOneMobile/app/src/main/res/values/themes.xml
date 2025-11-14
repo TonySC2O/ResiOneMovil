@@ -6,4 +6,7 @@
     </style>
 
     <style name="Theme.ResiOneMobile" parent="Base.Theme.ResiOneMobile" />
+    <style name="CustomSpinnerTheme" parent="Theme.AppCompat.Light">
+        <item name="android:textColor">@color/black</item>
+    </style>
 </resources>
