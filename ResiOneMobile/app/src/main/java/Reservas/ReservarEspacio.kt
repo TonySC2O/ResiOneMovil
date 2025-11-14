@@ -44,16 +44,13 @@ class ReservarEspacio : BaseActivity() {
     private lateinit var adapter: CalendarMonthAdapter  // Adapter para manejar días del calendario
 
     // ============ DATOS DE SESIÓN Y ALMACENAMIENTO ============
-    // Usuario actual (simulado). Cambiar entre: UsuarioDePrueba, UsuarioExtra, UsuarioAdmin
-    // NOTA: Reemplazar con sistema de login real o SharedPreferences cuando esté disponible
-    private var currentUser: String = "UsuarioDePrueba"
-
     // Lista en memoria de todas las reservas (no persiste entre sesiones)
     // NOTA: Reemplazar con Room DB o MongoDB cuando se integre persistencia real
     private val inMemoryReservas = mutableListOf<ReservaLight>()
     
     // ============ FORMATOS DE FECHA ============
     private val dateFormat = SimpleDateFormat("dd / MM / yyyy", Locale.getDefault())  // Para mostrar fechas al usuario
+    private val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())           // Para mostrar horas
     private val keyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())       // Para comparar fechas internamente
     
     // Calendario que mantiene el mes actual visualizado (para navegación prev/next)
@@ -331,73 +328,145 @@ class ReservarEspacio : BaseActivity() {
             val newEnd = timeToMinutes(horaFinal)
             val fechaKey = keyFormat.format(fechaDate)
 
-            // Filtrar reservas del mismo día y mismo espacio
-            val sameDaySameSpace = inMemoryReservas.filter { keyFormat.format(it.fecha) == fechaKey && it.espacio == espacio }
+            // Filtrar solo reservas confirmadas del mismo día y espacio
+            // Las solicitudes pendientes NO bloquean el calendario hasta ser aprobadas
+            val reservasConfirmadas = ReservasConfirmadasManager.obtenerReservas()
+                .filter { keyFormat.format(it.fecha) == fechaKey && it.espacio == espacio }
 
-            // Detectar si alguna reserva existente solapa con la nueva
-            // Algoritmo: dos intervalos [A, B] y [C, D] NO solapan si B <= C o A >= D
-            // Por lo tanto, SÍ solapan si !(B <= C o A >= D)
-            val conflict = sameDaySameSpace.any { existing ->
+            // Detectar conflictos únicamente con reservas confirmadas
+            val conflict = reservasConfirmadas.any { existing ->
                 val exStart = timeToMinutes(existing.horaInicio)
                 val exEnd = timeToMinutes(existing.horaFinal)
-                !(newEnd <= exStart || newStart >= exEnd)  // true = hay solapamiento
+                !(newEnd <= exStart || newStart >= exEnd)
             }
 
             if (conflict) {
-                Toast.makeText(this, "Conflicto: ya existe una reserva en ese espacio con horas solapadas", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Conflicto: ya existe una reserva confirmada en ese espacio con horas solapadas", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
 
-            // No hay conflicto — guardar reserva en memoria
-            inMemoryReservas.add(reserva)
-            Toast.makeText(this, "Reserva guardada (in-memory)", Toast.LENGTH_SHORT).show()
+            // Crear las fechas completas con hora para la solicitud
+            val calInicio = Calendar.getInstance()
+            calInicio.time = fechaDate
+            val horaInicioParts = horaInicio.split(":")
+            calInicio.set(Calendar.HOUR_OF_DAY, horaInicioParts[0].toInt())
+            calInicio.set(Calendar.MINUTE, horaInicioParts[1].toInt())
+            
+            val calFin = Calendar.getInstance()
+            calFin.time = fechaDate
+            val horaFinalParts = horaFinal.split(":")
+            calFin.set(Calendar.HOUR_OF_DAY, horaFinalParts[0].toInt())
+            calFin.set(Calendar.MINUTE, horaFinalParts[1].toInt())
 
-            // Refrescar colores del calendario para mostrar el nuevo estado
+            // Crear solicitud pendiente (ya no se guarda directamente como reserva)
+            val solicitud = SolicitudReserva(
+                espacio = espacio,
+                residente = currentUser,
+                fecha = fechaDate,
+                horaInicio = calInicio.time,
+                horaFin = calFin.time,
+                cantidad = cantidad,
+                observaciones = ""  // Se puede agregar campo de observaciones al formulario si se desea
+            )
+            
+            // Guardar solicitud en el gestor de solicitudes
+            SolicitudesManager.agregarSolicitud(solicitud)
+            
+            Toast.makeText(this, "✓ Solicitud enviada. Esperando aprobación del administrador", Toast.LENGTH_LONG).show()
+
+            // Limpiar campos del formulario
+            etFecha.text.clear()
+            etHoraInicio.text.clear()
+            etHoraFinal.text.clear()
+            etCantidad.text.clear()
+            
+            // Refrescar colores del calendario para mostrar solicitudes pendientes
             adapter.updateDays(generateMonthDays(currentMonthCalendar))
         }
 
-        // ============ CONFIGURACIÓN DEL BOTÓN DE CAMBIO DE USUARIO ============
-        // Botón para simular cambio de usuario (cicla entre 3 usuarios)
-        // Útil para testing de permisos: UsuarioDePrueba -> UsuarioExtra -> UsuarioAdmin
-        val btnSwitchUser = findViewById<Button>(R.id.btn_switch_user)
-        btnSwitchUser.setOnClickListener {
-            currentUser = when (currentUser) {
-                "UsuarioDePrueba" -> "UsuarioExtra"
-                "UsuarioExtra" -> "UsuarioAdmin"
-                else -> "UsuarioDePrueba"  // Volver al inicio del ciclo
-            }
-            btnSwitchUser.text = "Usuario: $currentUser (Cambiar)"
-            Toast.makeText(this, "Usuario cambiado a: $currentUser", Toast.LENGTH_SHORT).show()
-        }
+        // ============ CONFIGURACIÓN DEL BOTÓN DE CAMBIO DE USUARIO (SIMULACIÓN) ============
+        // Configurar botón de simulación de cambio de usuario heredado de BaseActivity
+        // NOTA: Este botón es SOLO para testing y debe ser removido en producción
+        setupUserSwitchButton(R.id.btn_switch_user)
     }
 
     /**
-     * Muestra un diálogo con la lista de reservas para un día específico.
-     * Si no hay reservas, muestra mensaje informativo.
+     * Muestra un diálogo con la lista de reservas confirmadas y solicitudes pendientes para un día específico.
+     * Si no hay reservas ni solicitudes, muestra mensaje informativo.
      * Al seleccionar una reserva de la lista, abre el diálogo de detalles.
      * 
      * @param day El día del calendario seleccionado por el usuario
      */
     private fun showReservationsForDay(day: CalendarDay) {
         val key = keyFormat.format(day.date)
-        val items = inMemoryReservas.filter { keyFormat.format(it.fecha) == key }
-        if (items.isEmpty()) {
+        
+        // Obtener reservas confirmadas
+        val reservasConfirmadas = ReservasConfirmadasManager.obtenerReservas()
+            .filter { keyFormat.format(it.fecha) == key }
+        
+        // Obtener solicitudes pendientes
+        val solicitudesPendientes = SolicitudesManager.obtenerSolicitudesPendientes()
+            .filter { keyFormat.format(it.fecha) == key }
+        
+        if (reservasConfirmadas.isEmpty() && solicitudesPendientes.isEmpty()) {
             AlertDialog.Builder(this)
-                .setTitle("No reservations")
-                .setMessage("No reservations for ${day.dayNumber}")
+                .setTitle("Sin reservas")
+                .setMessage("No hay reservas ni solicitudes para este día")
                 .setPositiveButton("OK", null)
                 .show()
             return
         }
 
-        val labels = items.map { "${it.horaInicio}-${it.horaFinal} • ${it.espacio} • ${it.cantidad}p" }.toTypedArray()
+        // Crear lista combinada de labels
+        val labelsReservas = reservasConfirmadas.map { 
+            "✓ ${it.horaInicio}-${it.horaFinal} • ${it.espacio} • ${it.cantidad}p (Confirmada)" 
+        }
+        val labelsSolicitudes = solicitudesPendientes.map {
+            val horaInicio = timeFormat.format(it.horaInicio)
+            val horaFin = timeFormat.format(it.horaFin)
+            "⏳ $horaInicio-$horaFin • ${it.espacio} • ${it.cantidad}p (Pendiente)"
+        }
+        val labels = (labelsReservas + labelsSolicitudes).toTypedArray()
 
         AlertDialog.Builder(this)
             .setTitle("Reservas: ${day.dayNumber}")
             .setItems(labels) { _, which ->
-                val selected = items[which]
-                showReservationDetailDialog(selected)
+                if (which < reservasConfirmadas.size) {
+                    // Es una reserva confirmada
+                    val selected = reservasConfirmadas[which]
+                    showReservationDetailDialog(selected)
+                } else {
+                    // Es una solicitud pendiente
+                    val solicitudIndex = which - reservasConfirmadas.size
+                    val solicitud = solicitudesPendientes[solicitudIndex]
+                    showSolicitudDetailDialog(solicitud)
+                }
             }
+            .setPositiveButton("Cerrar", null)
+            .show()
+    }
+    
+    /**
+     * Muestra diálogo con detalles de una solicitud pendiente.
+     * Los residentes solo pueden ver el estado, no pueden cancelarla una vez enviada.
+     * 
+     * @param solicitud La solicitud a mostrar
+     */
+    private fun showSolicitudDetailDialog(solicitud: SolicitudReserva) {
+        val details = StringBuilder()
+        details.append("Estado: PENDIENTE DE APROBACIÓN\n\n")
+        details.append("Solicitante: ${solicitud.residente}\n")
+        details.append("Espacio: ${solicitud.espacio}\n")
+        details.append("Fecha: ${dateFormat.format(solicitud.fecha)}\n")
+        details.append("Hora: ${timeFormat.format(solicitud.horaInicio)} - ${timeFormat.format(solicitud.horaFin)}\n")
+        details.append("Cantidad: ${solicitud.cantidad} personas\n")
+        if (solicitud.observaciones.isNotBlank()) {
+            details.append("Observaciones: ${solicitud.observaciones}")
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Solicitud Pendiente")
+            .setMessage(details.toString())
             .setPositiveButton("Cerrar", null)
             .show()
     }
@@ -493,7 +562,7 @@ class ReservarEspacio : BaseActivity() {
                         // TODO: Aquí se debe enviar código SMS para validar la cancelación
                         
                         // Eliminar reserva
-                        inMemoryReservas.remove(reserva)
+                        ReservasConfirmadasManager.eliminarReserva(reserva)
                         adapter.updateDays(generateMonthDays(currentMonthCalendar))
                         
                         // Mostrar advertencia de cancelación tardía
@@ -519,7 +588,7 @@ class ReservarEspacio : BaseActivity() {
                         // TODO: Aquí se debe enviar código SMS para validar la cancelación
                         
                         // Eliminar reserva
-                        inMemoryReservas.remove(reserva)
+                        ReservasConfirmadasManager.eliminarReserva(reserva)
                         adapter.updateDays(generateMonthDays(currentMonthCalendar))
                         
                         Toast.makeText(this, "✓ Reserva cancelada exitosamente", Toast.LENGTH_SHORT).show()
@@ -611,7 +680,8 @@ class ReservarEspacio : BaseActivity() {
 
                 // Filtrar reservas del mismo día y espacio, EXCLUYENDO la reserva actual
                 // (it !== reserva) permite que la reserva editada no entre en conflicto consigo misma
-                val sameDaySameSpace = inMemoryReservas.filter { keyFormat.format(it.fecha) == fechaKey && it.espacio == newEspacio && it !== reserva }
+                val reservasConfirmadas = ReservasConfirmadasManager.obtenerReservas()
+                val sameDaySameSpace = reservasConfirmadas.filter { keyFormat.format(it.fecha) == fechaKey && it.espacio == newEspacio && it !== reserva }
 
                 // Verificar solapamiento con otras reservas
                 val conflict = sameDaySameSpace.any { existing ->
@@ -627,15 +697,14 @@ class ReservarEspacio : BaseActivity() {
 
                 // ============ APLICAR CAMBIOS ============
                 // Normalizar tiempos de "hh-mm" a "HH:mm" para almacenamiento consistente
-                // Reemplazar la reserva en la lista (mantiene el creador original)
-                val idx = inMemoryReservas.indexOf(reserva)
-                if (idx >= 0) {
-                    val saveInicio = normalize(newHoraInicio)  // Convierte "09-30" a "09:30"
-                    val saveFinal = normalize(newHoraFinal)
-                    inMemoryReservas[idx] = reserva.copy(espacio = newEspacio, horaInicio = saveInicio, horaFinal = saveFinal, cantidad = newCant)
-                    adapter.updateDays(generateMonthDays(currentMonthCalendar))  // Refrescar calendario
-                    Toast.makeText(ctx, "Reserva actualizada", Toast.LENGTH_SHORT).show()
-                }
+                // Eliminar la reserva antigua y agregar la actualizada
+                ReservasConfirmadasManager.eliminarReserva(reserva)
+                val saveInicio = normalize(newHoraInicio)  // Convierte "09-30" a "09:30"
+                val saveFinal = normalize(newHoraFinal)
+                val reservaActualizada = reserva.copy(espacio = newEspacio, horaInicio = saveInicio, horaFinal = saveFinal, cantidad = newCant)
+                ReservasConfirmadasManager.agregarReserva(reservaActualizada)
+                adapter.updateDays(generateMonthDays(currentMonthCalendar))  // Refrescar calendario
+                Toast.makeText(ctx, "Reserva actualizada", Toast.LENGTH_SHORT).show()
 
                 dialog.dismiss()
             }
@@ -684,12 +753,12 @@ class ReservarEspacio : BaseActivity() {
     }
 
     /**
-     * Determina el estado visual de un día en el calendario basado en sus reservas.
+     * Determina el estado visual de un día en el calendario basado en sus reservas y solicitudes.
      * 
      * Lógica de colores:
-     * - COMPLETED (verde): Fechas pasadas que tienen reservas
-     * - PENDING (azul): Fecha actual o futura que tiene reservas
-     * - NONE (sin color): Días sin reservas
+     * - COMPLETED (verde): Fechas pasadas que tienen reservas confirmadas
+     * - PENDING (azul): Fecha actual o futura que tiene reservas confirmadas o solicitudes pendientes
+     * - NONE (sin color): Días sin reservas ni solicitudes
      * 
      * @param date Fecha del día a evaluar
      * @param today Fecha actual para comparación
@@ -697,11 +766,15 @@ class ReservarEspacio : BaseActivity() {
      */
     private fun determineStatus(date: Date, today: Date): ReservaStatus {
         val key = keyFormat.format(date)
-        val hasReserva = inMemoryReservas.any { keyFormat.format(it.fecha) == key }
+        val hasReservaConfirmada = ReservasConfirmadasManager.obtenerReservas()
+            .any { keyFormat.format(it.fecha) == key }
+        val hasSolicitudPendiente = SolicitudesManager.obtenerSolicitudesPendientes()
+            .any { keyFormat.format(it.fecha) == key }
+        
         return if (!date.after(today) && !isSameDay(date, today)) {
-            if (hasReserva) ReservaStatus.COMPLETED else ReservaStatus.NONE
+            if (hasReservaConfirmada) ReservaStatus.COMPLETED else ReservaStatus.NONE
         } else {
-            if (hasReserva) ReservaStatus.PENDING else ReservaStatus.NONE
+            if (hasReservaConfirmada || hasSolicitudPendiente) ReservaStatus.PENDING else ReservaStatus.NONE
         }
     }
 

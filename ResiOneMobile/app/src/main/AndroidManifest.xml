@@ -17,6 +17,16 @@
             android:label="@string/title_activity_reservar_espacio"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
+            android:name="Reservas.AdminReservas"
+            android:exported="true"
+            android:label="Administrar Reservas"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name="Reportes.Reportes"
+            android:exported="true"
+            android:label="Reportes"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
             android:name="Reportes.CrearReporte"
             android:exported="true"
             android:label="@string/title_activity_crear_reporte"

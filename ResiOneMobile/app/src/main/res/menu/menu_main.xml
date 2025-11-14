@@ -8,9 +8,25 @@
         android:title="Reservas de Espacios"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_reportes"
+        android:id="@+id/action_admin_reservas"
         android:orderInCategory="2"
+        android:title="Administrar Reservas"
+        android:visible="false"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_ver_reportes"
+        android:orderInCategory="3"
+        android:title="Ver Reportes"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_reportes"
+        android:orderInCategory="4"
         android:title="Crear Reportes"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_inicio"
+        android:orderInCategory="5"
+        android:title="Inicio"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_settings"
