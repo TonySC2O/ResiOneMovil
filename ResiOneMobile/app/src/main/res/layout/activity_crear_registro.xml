@@ -23,12 +23,14 @@
             android:orientation="vertical"
             android:paddingTop="16dp">
 
+            <!-- Nombre -->
             <EditText
                 android:id="@+id/et_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Nombre completo" />
 
+            <!-- Correo -->
             <EditText
                 android:id="@+id/et_email"
                 android:layout_width="match_parent"
@@ -37,13 +39,44 @@
                 android:inputType="textEmailAddress"
                 android:layout_marginTop="12dp" />
 
+            <!-- Teléfono -->
+            <EditText
+                android:id="@+id/et_phone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Teléfono (8 dígitos)"
+                android:inputType="number"
+                android:maxLength="8"
+                android:layout_marginTop="12dp" />
+
+            <!-- Identificación -->
+            <EditText
+                android:id="@+id/et_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Identificación (9 dígitos)"
+                android:inputType="number"
+                android:maxLength="9"
+                android:layout_marginTop="12dp" />
+
+            <!-- Apartamento -->
             <EditText
                 android:id="@+id/et_house_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Número de casa"
+                android:hint="Número de apartamento"
                 android:layout_marginTop="12dp" />
 
+            <!-- Habitantes -->
+            <EditText
+                android:id="@+id/et_habitantes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Cantidad de habitantes"
+                android:inputType="number"
+                android:layout_marginTop="12dp" />
+
+            <!-- Contraseña -->
             <EditText
                 android:id="@+id/et_password"
                 android:layout_width="match_parent"
@@ -60,6 +93,7 @@
                 android:inputType="textPassword"
                 android:layout_marginTop="12dp" />
 
+            <!-- Rol -->
             <TextView
                 android:text="Rol"
                 android:layout_width="wrap_content"
@@ -72,6 +106,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp" />
 
+            <!-- Código empleado para admin -->
             <LinearLayout
                 android:id="@+id/admin_code_container"
                 android:orientation="vertical"
@@ -84,9 +119,10 @@
                     android:id="@+id/et_admin_code"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Código admin" />
+                    android:hint="Código empleado (4 letras + 2 números)" />
             </LinearLayout>
 
+            <!-- Botones -->
             <Button
                 android:id="@+id/btn_register"
                 android:text="Crear cuenta"
