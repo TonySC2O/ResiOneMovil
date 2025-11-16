@@ -12,6 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ResiOneMobile">
         <activity
+            android:name="Registro.CrearRegistro"
+            android:exported="true"
+            android:label="Crear Registro"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
             android:name="Reservas.ReservarEspacio"
             android:exported="true"
             android:label="@string/title_activity_reservar_espacio"

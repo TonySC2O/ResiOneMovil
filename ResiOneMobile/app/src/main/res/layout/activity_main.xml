@@ -46,6 +46,11 @@
             android:padding="24dp"
             android:gravity="center">
 
+
+            <!-- ============================== -->
+            <!--       SECCIÓN DE LOGIN         -->
+            <!-- ============================== -->
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -57,10 +62,65 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Utiliza el menú superior para navegar"
+                android:text="Inicia sesión para continuar"
                 android:textSize="16sp"
                 android:textColor="@android:color/darker_gray"
-                android:gravity="center" />
+                android:gravity="center"
+                android:layout_marginBottom="32dp" />
+
+            <EditText
+                android:id="@+id/edtEmail"
+                android:hint="Correo"
+                android:inputType="textEmailAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:background="@android:drawable/edit_text"
+                android:layout_marginBottom="16dp"/>
+
+            <EditText
+                android:id="@+id/edtPassword"
+                android:hint="Contraseña"
+                android:inputType="textPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:background="@android:drawable/edit_text"
+                android:layout_marginBottom="24dp"/>
+
+            <Button
+                android:id="@+id/btnLogin"
+                android:text="Ingresar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="14dp"/>
+
+            <TextView
+                android:id="@+id/tvRegister"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="¿No tienes cuenta? Regístrate"
+                android:textColor="@color/teal_700"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/tvForgotPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="¿Olvidaste la contraseña? Cambiar contraseña"
+                android:textColor="@android:color/holo_red_dark"
+                android:layout_marginTop="8dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+
+            <!-- ============================== -->
+            <!--     FIN SECCIÓN DE LOGIN       -->
+            <!-- ============================== -->
+
 
         </LinearLayout>
     </ScrollView>
