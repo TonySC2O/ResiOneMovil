@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/et_monto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Monto"
+        android:inputType="numberDecimal" />
+
+    <EditText
+        android:id="@+id/et_fecha_vencimiento"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Fecha de Vencimiento (YYYY-MM-DD)"
+        android:inputType="date" />
+
+    <EditText
+        android:id="@+id/et_unidad_habitacional"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Unidad Habitacional" />
+
+    <EditText
+        android:id="@+id/et_residente_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="ID del Residente" />
+
+    <Spinner
+        android:id="@+id/spinner_estado_pago"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btn_guardar_cuota"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Guardar Cuota" />
+
+</LinearLayout>

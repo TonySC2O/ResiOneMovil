@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -14,6 +15,31 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ResiOneMobile">
+        <activity
+            android:name="Comunicados.ComunicadosFeed"
+            android:exported="true"
+            android:label="Comunicados"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name="Pagos.PagosMain"
+            android:exported="true"
+            android:label="Pagos"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name="Pagos.RegistroCuota"
+            android:exported="true"
+            android:label="Registrar Cuota"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name="Pagos.RegistroPago"
+            android:exported="true"
+            android:label="Registrar Pago"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name="Pagos.HistorialPagos"
+            android:exported="true"
+            android:label="Historial de Pagos"
+            android:theme="@style/Theme.ResiOneMobile" />
         <activity
             android:name="Registro.CrearRegistro"
             android:exported="true"

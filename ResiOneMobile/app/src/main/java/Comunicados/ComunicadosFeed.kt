@@ -1,5 +1,6 @@
 package Comunicados;
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -15,10 +16,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.*
-import Comunicados.PostsAdapter
 import com.example.resionemobile.R
-
-
+import Pagos.PagosMain
 
 class ComunicadosFeed : AppCompatActivity() {
 
@@ -32,6 +31,7 @@ class ComunicadosFeed : AppCompatActivity() {
         val rvPosts = findViewById<RecyclerView>(R.id.rv_posts)
         val etNewPost = findViewById<EditText>(R.id.et_new_post)
         val btnPost = findViewById<Button>(R.id.btn_post)
+        val btnPagos = findViewById<Button>(R.id.btn_pagos)
 
         adapter = PostsAdapter(postsList, onEdit = { post -> editPost(post) }, onDelete = { post -> deletePost(post) })
         rvPosts.layoutManager = LinearLayoutManager(this)
@@ -45,6 +45,11 @@ class ComunicadosFeed : AppCompatActivity() {
                 createPost(content)
                 etNewPost.text.clear()
             }
+        }
+
+        btnPagos.setOnClickListener {
+            val intent = Intent(this, PagosMain::class.java)
+            startActivity(intent)
         }
 
         fetchPosts()
@@ -94,5 +99,3 @@ class ComunicadosFeed : AppCompatActivity() {
         })
     }
 }
-
-

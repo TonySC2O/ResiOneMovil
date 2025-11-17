@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tv_cuota_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Detalles de la Cuota" />
+
+    <EditText
+        android:id="@+id/et_nombre_completo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nombre Completo" />
+
+    <EditText
+        android:id="@+id/et_unidad_habitacional_pago"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Unidad Habitacional" />
+
+    <Spinner
+        android:id="@+id/spinner_opcion_pago"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btn_upload_comprobante"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Subir Comprobante (PDF)" />
+
+    <Button
+        android:id="@+id/btn_registrar_pago"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Registrar Pago" />
+
+</LinearLayout>
