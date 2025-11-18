@@ -11,7 +11,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import Registro.CrearRegistro
 import Comunicados.ComunicadosFeed
-import Comunicados.PostsAdapter
+import Comunicados.ComunicadosAdapter
 import com.example.resionemobile.api.LoginRequest
 import com.example.resionemobile.api.LoginResponse
 import com.example.resionemobile.api.RetrofitClient

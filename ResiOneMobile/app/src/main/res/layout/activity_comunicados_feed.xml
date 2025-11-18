@@ -1,29 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
-    <EditText
-        android:id="@+id/et_new_post"
-        android:hint="¿Qué quieres publicar?"
+    <!-- Toolbar principal (usa app:logo para mostrar el icono) -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/teal_700"
+        app:title="Comunicados"
+        app:titleTextColor="@android:color/white"
+        app:logo="@mipmap/ic_launcher_round"
+        app:navigationIconTint="@android:color/white" />
 
-    <Button
-        android:id="@+id/btn_post"
-        android:text="Publicar"
-        android:layout_width="wrap_content"
+    <!-- Área de publicación: EditText + Botón -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginTop="8dp" />
+        android:gravity="center_vertical">
 
+        <EditText
+            android:id="@+id/et_new_post"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="¿Qué quieres publicar?"
+            android:inputType="textMultiLine"
+            android:maxLines="4"
+            android:imeOptions="actionDone"
+            android:padding="8dp"
+            android:backgroundTint="@color/black" />
+
+        <Button
+            android:id="@+id/btn_post"
+            android:text="Publicar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"/>
+    </LinearLayout>
+
+    <!-- Lista de posts -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_posts"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="16dp"/>
+        android:padding="8dp"
+        android:clipToPadding="false"
+        android:scrollbars="vertical" />
 </LinearLayout>

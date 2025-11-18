@@ -26,6 +26,7 @@ import java.util.Locale
 class CrearReporte : BaseActivity() {
 
     private val attachedUris = mutableListOf<Uri>()
+
     private var selectedDate: Date? = null
 
     private val pickMedia = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
