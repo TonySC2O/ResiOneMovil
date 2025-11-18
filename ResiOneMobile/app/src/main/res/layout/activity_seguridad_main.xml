@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="16dp"
+    tools:context="Seguridad.SeguridadMain">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Módulo de Seguridad"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="32dp"/>
+
+    <Button
+        android:id="@+id/btnRegistrarEntrada"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Registrar Entrada de Visitante"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnRegistrarSalida"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Registrar Salida de Visitante"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnVerBitacora"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ver Bitácora de Accesos"/>
+
+</LinearLayout>

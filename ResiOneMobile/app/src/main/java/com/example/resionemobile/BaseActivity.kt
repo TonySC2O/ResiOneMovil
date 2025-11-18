@@ -5,10 +5,13 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import Finanzas.RegistroCuota
 import Reportes.CrearReporte
 import Reportes.Reportes
 import Reservas.AdminReservas
 import Reservas.ReservarEspacio
+import Seguridad.RegistroEntrada
+import Seguridad.RegistroSalida
 
 /**
  * Activity base que proporciona funcionalidad común para todas las activities de la aplicación.
@@ -125,6 +128,14 @@ abstract class BaseActivity : AppCompatActivity() {
                 navigateToInicio()
                 true
             }
+            R.id.action_visient -> {
+                navigateToVisiEntradas()
+                true
+            }
+            R.id.action_visisal -> {
+                navigateToVisiSalidas()
+                true
+            }
             R.id.action_settings -> {
                 // TODO: Implementar navegación a configuración cuando esté disponible
                 Toast.makeText(this, "Configuración - Por implementar", Toast.LENGTH_SHORT).show()
@@ -187,6 +198,32 @@ abstract class BaseActivity : AppCompatActivity() {
             Toast.makeText(this, "Ya estás en Crear Reportes", Toast.LENGTH_SHORT).show()
         } else {
             val intent = Intent(this, CrearReporte::class.java)
+            startActivity(intent)
+        }
+    }
+
+    /**
+     * Navega a la pantalla de Registrar Entradas.
+     * Verifica que no estemos ya en esa pantalla antes de navegar.
+     */
+    private fun navigateToVisiEntradas() {
+        if (this is CrearReporte) {
+            Toast.makeText(this, "Ya estás en Visitas", Toast.LENGTH_SHORT).show()
+        } else {
+            val intent = Intent(this, RegistroEntrada::class.java)
+            startActivity(intent)
+        }
+    }
+
+    /**
+     * Navega a la pantalla de Registrar Salidas.
+     * Verifica que no estemos ya en esa pantalla antes de navegar.
+     */
+    private fun navigateToVisiSalidas() {
+        if (this is CrearReporte) {
+            Toast.makeText(this, "Ya estás en Visitas", Toast.LENGTH_SHORT).show()
+        } else {
+            val intent = Intent(this, RegistroSalida::class.java)
             startActivity(intent)
         }
     }

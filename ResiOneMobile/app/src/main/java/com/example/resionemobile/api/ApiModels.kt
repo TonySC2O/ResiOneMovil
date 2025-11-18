@@ -12,7 +12,6 @@ data class RegistroRequest(
     val codigoEmpleado: String? = null
 )
 
-
 data class GenericResponse(
     val mensaje: String
 )
@@ -53,4 +52,129 @@ data class GenericPostResponse(
 data class PostListResponse(
     val mensaje: String,
     val posts: List<Post>
+)
+
+
+// ------------------------
+// Pagos y Finanzas
+// ------------------------
+
+data class Cuota(
+    val _id: String,
+    val monto: Double,
+    val fechaVencimiento: String,
+    val unidadHabitacional: String,
+    val residente: String,
+    val estado: String,
+    val createdAt: String
+)
+
+data class CuotaListResponse(
+    val mensaje: String,
+    val cuotas: List<Cuota>
+)
+
+data class CrearCuotaRequest(
+    val monto: Double,
+    val fechaVencimiento: String,
+    val unidadHabitacional: String,
+    val residente: String,
+    val estado: String? = null
+)
+
+data class CrearCuotaResponse(
+    val mensaje: String,
+    val cuota: Cuota
+)
+
+data class Pago(
+    val _id: String,
+    val cuotaId: String,
+    val residenteId: String,
+    val nombreResidente: String,
+    val unidadHabitacional: String,
+    val fechaPago: String,
+    val metodoPago: String,
+    val comprobantePDF: String?,
+    val createdAt: String
+)
+
+data class PagoListResponse(
+    val mensaje: String,
+    val pagos: List<Pago>
+)
+
+data class PagoRequest(
+    val cuotaId: String,
+    val residenteId: String,
+    val nombreResidente: String,
+    val unidadHabitacional: String,
+    val fechaPago: String,
+    val metodoPago: String
+)
+
+data class Factura(
+    val _id: String,
+    val numeroFactura: String,
+    val pagoId: String,
+    val cuotaId: String,
+    val detalle: String,
+    val nombreResidente: String,
+    val metodoPago: String,
+    val pdfPath: String?,
+    val fechaEmision: String
+)
+
+data class FacturaResponse(
+    val mensaje: String,
+    val factura: Factura
+)
+
+
+// ------------------------
+// Seguridad y Acceso
+// ------------------------
+
+data class EntradaRequest(
+    val visitanteId: String,
+    val nombre: String,
+    val identificacion: String,
+    val tipoVisita: String,
+    val correo: String,
+    val fechaHoraIngreso: String,
+    val residenteRelacionado: String?,
+    val vehiculo: VehiculoData?
+)
+
+data class VehiculoData(
+    val placa: String,
+    val modelo: String,
+    val descripcion: String
+)
+
+data class EntradaResponse(
+    val mensaje: String,
+    val qrCode: String,      // Base64 o URL del QR retornado por backend
+    val entradaId: String
+)
+
+data class SalidaRequest(
+    val qrIdentificador: String,
+    val fechaHoraSalida: String
+)
+
+data class BitacoraItem(
+    val id: String,
+    val visitanteId: String,
+    val nombre: String,
+    val fechaHoraIngreso: String,
+    val fechaHoraSalida: String?,
+    val tipoVisita: String,
+    val placa: String?,
+    val residenteRelacionado: String?
+)
+
+data class BitacoraResponse(
+    val mensaje: String,
+    val registros: List<BitacoraItem>
 )

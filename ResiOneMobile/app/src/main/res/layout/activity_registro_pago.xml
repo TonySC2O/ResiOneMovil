@@ -1,44 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    tools:context="Finanzas.RegistroPago">
 
-    <TextView
-        android:id="@+id/tv_cuota_details"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Detalles de la Cuota" />
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <EditText
-        android:id="@+id/et_nombre_completo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Nombre Completo" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Registro de Pago de Cuota"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp"/>
 
-    <EditText
-        android:id="@+id/et_unidad_habitacional_pago"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Unidad Habitacional" />
+        <Spinner
+            android:id="@+id/spinnerCuotasPendientes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp" />
 
-    <Spinner
-        android:id="@+id/spinner_opcion_pago"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-    <Button
-        android:id="@+id/btn_upload_comprobante"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Subir Comprobante (PDF)" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etFechaPago"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Fecha de Pago (YYYY-MM-DD)"
+                android:focusable="false"
+                android:clickable="true"/>
+        </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
-        android:id="@+id/btn_registrar_pago"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="Registrar Pago" />
+        <RadioGroup
+            android:id="@+id/rgMetodoPago"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
 
-</LinearLayout>
+            <RadioButton
+                android:id="@+id/rbEfectivo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Efectivo"/>
+
+            <RadioButton
+                android:id="@+id/rbTransferencia"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Transferencia"/>
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/btnSeleccionarComprobante"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Seleccionar Comprobante (PDF)"
+            android:visibility="gone"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/tvComprobanteSeleccionado"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp" />
+
+        <Button
+            android:id="@+id/btnRegistrarPago"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Registrar Pago"/>
+
+    </LinearLayout>
+</ScrollView>

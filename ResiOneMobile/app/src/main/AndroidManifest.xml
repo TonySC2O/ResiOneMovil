@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -21,24 +22,39 @@
             android:label="Comunicados"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
-            android:name="Pagos.PagosMain"
-            android:exported="true"
-            android:label="Pagos"
-            android:theme="@style/Theme.ResiOneMobile" />
-        <activity
-            android:name="Pagos.RegistroCuota"
+            android:name="Finanzas.RegistroCuota"
             android:exported="true"
             android:label="Registrar Cuota"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
-            android:name="Pagos.RegistroPago"
+            android:name="Finanzas.RegistroPago"
             android:exported="true"
             android:label="Registrar Pago"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
-            android:name="Pagos.HistorialPagos"
+            android:name="Finanzas.HistorialPagos"
             android:exported="true"
             android:label="Historial de Pagos"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name="Seguridad.SeguridadMain"
+            android:exported="true"
+            android:label="Seguridad"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name="Seguridad.RegistroEntrada"
+            android:exported="true"
+            android:label="Registrar Entrada"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name="Seguridad.RegistroSalida"
+            android:exported="true"
+            android:label="Registrar Salida"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name="Seguridad.Bitacora"
+            android:exported="true"
+            android:label="Bitácora de Acceso"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
             android:name="Registro.CrearRegistro"
