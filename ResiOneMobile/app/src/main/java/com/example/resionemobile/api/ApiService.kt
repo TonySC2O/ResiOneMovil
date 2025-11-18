@@ -1,6 +1,5 @@
 package com.example.resionemobile.api
 
-import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.Path
@@ -23,15 +22,18 @@ interface ApiService {
     @PUT("editar")
     fun editar(@Body body: Map<String, @JvmSuppressWildcards Any>): Call<GenericResponse>
 
-    @GET("posts")
-    fun getPosts(): Call<PostListResponse>
+    // --- COMUNICADOS (ajustadas a tu API actual) ---
+    @GET("comunicados/feed")
+    fun getComunicados(): Call<ComunicadoListResponse>
 
-    @POST("posts")
-    fun createPost(@Body body: Post): Call<GenericPostResponse>
+    @POST("comunicados/crear")
+    fun crearComunicado(@Body body: CrearComunicadoRequest): Call<ComunicadoResponse>
 
-    @PUT("posts/{id}")
-    fun updatePost(@Path("id") id: String, @Body body: Post): Call<GenericPostResponse>
+    @PUT("comunicados/editar/{id}")
+    fun editarComunicado(@Path("id") id: String, @Body body: EditarComunicadoRequest): Call<ComunicadoResponse>
 
+    @DELETE("comunicados/eliminar/{id}")
+    fun eliminarComunicado(@Path("id") id: String): Call<GenericResponse>
     @DELETE("posts/{id}")
     fun deletePost(@Path("id") id: String): Call<GenericPostResponse>
 
