@@ -1,5 +1,7 @@
 package com.example.resionemobile.api
 
+import com.google.gson.annotations.SerializedName
+
 data class RegistroRequest(
     val nombre: String,
     val correo: String,
@@ -54,6 +56,7 @@ data class PostListResponse(
     val mensaje: String,
     val posts: List<Post>
 )
+
 
 data class Comunicado(
     @SerializedName("_id") val id: String,
