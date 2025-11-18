@@ -49,6 +49,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="com.example.resionemobile.ChatBot.ChatBotActivity"
+            android:exported="false"
+            android:label="ResiBot - Asistente"
+            android:parentActivityName=".MainActivity" />
     </application>
 
 </manifest>
