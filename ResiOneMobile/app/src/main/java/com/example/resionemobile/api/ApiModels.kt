@@ -11,7 +11,8 @@ data class RegistroRequest(
     val habitantes: Int,
     val contraseña: String,
     val esAdministrador: Boolean,
-    val codigoEmpleado: String? = null
+    val codigoEmpleado: String? = null,
+    val rol: String
 )
 
 data class GenericResponse(
@@ -31,7 +32,8 @@ data class UsuarioData(
     val apartamento: String?,
     val habitantes: Int?,
     val esAdministrador: Boolean,
-    val codigoEmpleado: String?
+    val codigoEmpleado: String?,
+    val rol: String? = null
 )
 
 data class LoginResponse(

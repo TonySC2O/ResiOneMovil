@@ -17,6 +17,36 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ResiOneMobile">
         <activity
+            android:name="Registro.PerfilView"
+            android:exported="true"
+            android:label="Perfil"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name="Comunicados.ComunicadosFeed"
+            android:exported="true"
+            android:label="Comunicados"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name=".finanzas.RegistroCuota"
+            android:exported="true"
+            android:label="Registrar Cuota"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name=".finanzas.RegistroPago"
+            android:exported="true"
+            android:label="Registrar Pago"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name=".finanzas.HistorialPagos"
+            android:exported="true"
+            android:label="Historial de Pagos"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name="Registro.CrearRegistro"
+            android:exported="true"
+            android:label="Crear Registro"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
             android:name="Reservas.ReservarEspacio"
             android:exported="true"
             android:label="@string/title_activity_reservar_espacio"
