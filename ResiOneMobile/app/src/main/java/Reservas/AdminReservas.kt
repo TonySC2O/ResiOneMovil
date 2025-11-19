@@ -7,15 +7,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.resionemobile.BaseActivity
 import com.example.resionemobile.R
-import api.ActualizarReservaRequest
-import api.ReservaBackend
-import api.RetrofitClient
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -74,8 +69,7 @@ class AdminReservas : BaseActivity() {
         // ============ CONFIGURACIÓN DEL CALENDARIO ============
         setupCalendar()
         
-        // ============ CARGAR DATOS DESDE BACKEND ============
-        cargarReservasAprobadasDesdeBackend()
+        // ============ CARGAR SOLICITUDES PENDIENTES ============
         loadSolicitudesPendientes()
         
         // ============ CONFIGURACIÓN DE NAVEGACIÓN DE MESES ============
@@ -96,8 +90,7 @@ class AdminReservas : BaseActivity() {
         
         // ============ CONFIGURACIÓN DEL BOTÓN DE CAMBIO DE USUARIO ============
         setupUserSwitchButton(R.id.btn_switch_user) {
-            // Recargar datos cuando cambia el usuario
-            cargarReservasAprobadasDesdeBackend()
+            // Recargar solicitudes cuando cambia el usuario
             loadSolicitudesPendientes()
         }
     }
@@ -187,109 +180,26 @@ class AdminReservas : BaseActivity() {
     }
     
     /**
-     * Carga reservas aprobadas desde el backend y actualiza el gestor local
-     */
-    private fun cargarReservasAprobadasDesdeBackend() {
-        lifecycleScope.launch {
-            try {
-                val response = RetrofitClient.reservasApi.obtenerReservasAprobadas()
-                
-                if (response.isSuccessful && response.body() != null) {
-                    val reservasBackend = response.body()!!
-                    
-                    // Limpiar y actualizar gestor local
-                    ReservasConfirmadasManager.limpiar()
-                    
-                    reservasBackend.forEach { reservaBackend ->
-                        try {
-                            val fecha = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                                .parse(reservaBackend.fecha)
-                            
-                            if (fecha != null) {
-                                val reservaLocal = ReservaLight(
-                                    id = reservaBackend.id,
-                                    espacio = reservaBackend.zona,
-                                    fecha = fecha,
-                                    horaInicio = reservaBackend.horaInicio,
-                                    horaFinal = reservaBackend.horaFin,
-                                    cantidad = reservaBackend.numeroPersonas,
-                                    creador = reservaBackend.residente
-                                )
-                                ReservasConfirmadasManager.agregarReserva(reservaLocal)
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    }
-                    
-                    // Actualizar calendario
-                    generateMonthDays()
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-    
-    /**
-     * Carga y muestra todas las solicitudes pendientes desde el backend.
+     * Carga y muestra todas las solicitudes pendientes ordenadas cronológicamente.
      */
     private fun loadSolicitudesPendientes() {
         solicitudesContainer.removeAllViews()
         
-        // Mostrar mensaje de carga
-        val loadingView = TextView(this).apply {
-            text = "Cargando solicitudes..."
-            textSize = 16f
-            setPadding(16, 32, 16, 32)
-            gravity = android.view.Gravity.CENTER
-            setTextColor(android.graphics.Color.GRAY)
-        }
-        solicitudesContainer.addView(loadingView)
+        val solicitudes = SolicitudesManager.obtenerSolicitudesPendientes()
+            .sortedWith(compareBy({ it.fecha }, { it.horaInicio }))
         
-        lifecycleScope.launch {
-            try {
-                val response = RetrofitClient.reservasApi.obtenerReservasPendientes()
-                
-                if (response.isSuccessful && response.body() != null) {
-                    val solicitudes = response.body()!!
-                        .sortedWith(compareBy({ it.fecha }, { it.horaInicio }))
-                    
-                    solicitudesContainer.removeAllViews()
-                    
-                    if (solicitudes.isEmpty()) {
-                        val emptyView = TextView(this@AdminReservas).apply {
-                            text = "No hay solicitudes pendientes"
-                            textSize = 16f
-                            setPadding(16, 32, 16, 32)
-                            gravity = android.view.Gravity.CENTER
-                            setTextColor(android.graphics.Color.GRAY)
-                        }
-                        solicitudesContainer.addView(emptyView)
-                        return@launch
-                    }
-                    
-                    mostrarSolicitudes(solicitudes)
-                }
-            } catch (e: Exception) {
-                solicitudesContainer.removeAllViews()
-                val errorView = TextView(this@AdminReservas).apply {
-                    text = "Error al cargar solicitudes: ${e.message}"
-                    textSize = 16f
-                    setPadding(16, 32, 16, 32)
-                    gravity = android.view.Gravity.CENTER
-                    setTextColor(android.graphics.Color.RED)
-                }
-                solicitudesContainer.addView(errorView)
-                e.printStackTrace()
+        if (solicitudes.isEmpty()) {
+            val emptyView = TextView(this).apply {
+                text = "No hay solicitudes pendientes"
+                textSize = 16f
+                setPadding(16, 32, 16, 32)
+                gravity = android.view.Gravity.CENTER
+                setTextColor(android.graphics.Color.GRAY)
             }
+            solicitudesContainer.addView(emptyView)
+            return
         }
-    }
-    
-    /**
-     * Muestra la lista de solicitudes en la interfaz
-     */
-    private fun mostrarSolicitudes(solicitudes: List<ReservaBackend>) {
+        
         solicitudes.forEachIndexed { index, solicitud ->
             val itemView = LayoutInflater.from(this)
                 .inflate(R.layout.item_solicitud_reserva, solicitudesContainer, false)
@@ -304,38 +214,27 @@ class AdminReservas : BaseActivity() {
             val btnAprobar = itemView.findViewById<Button>(R.id.btn_aprobar)
             val btnRechazar = itemView.findViewById<Button>(R.id.btn_rechazar)
             
-            // Llenar datos desde backend
-            tvEspacio.text = solicitud.zona
+            // Llenar datos
+            tvEspacio.text = solicitud.espacio
             tvResidente.text = "Residente: ${solicitud.residente}"
+            tvFecha.text = "Fecha: ${dateFormat.format(solicitud.fecha)}"
+            tvHora.text = "Horario: ${timeFormat.format(solicitud.horaInicio)} - ${timeFormat.format(solicitud.horaFin)}"
+            tvCantidad.text = "Cantidad: ${solicitud.cantidad} personas"
             
-            // Parsear fecha
-            try {
-                val fecha = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(solicitud.fecha)
-                if (fecha != null) {
-                    tvFecha.text = "Fecha: ${dateFormat.format(fecha)}"
-                }
-            } catch (e: Exception) {
-                tvFecha.text = "Fecha: ${solicitud.fecha}"
-            }
-            
-            tvHora.text = "Horario: ${solicitud.horaInicio} - ${solicitud.horaFin}"
-            tvCantidad.text = "Cantidad: ${solicitud.numeroPersonas} personas"
-            
-            // Mostrar comentarios (generados automáticamente)
-            if (solicitud.comentarios.isNotBlank()) {
+            if (solicitud.observaciones.isNotBlank()) {
                 tvObservaciones.visibility = android.view.View.VISIBLE
-                tvObservaciones.text = solicitud.comentarios
+                tvObservaciones.text = "Observaciones: ${solicitud.observaciones}"
             } else {
                 tvObservaciones.visibility = android.view.View.GONE
             }
             
             // Configurar botones
             btnAprobar.setOnClickListener {
-                aprobarSolicitudBackend(solicitud)
+                aprobarSolicitud(solicitud)
             }
             
             btnRechazar.setOnClickListener {
-                rechazarSolicitudBackend(solicitud)
+                rechazarSolicitud(solicitud)
             }
             
             solicitudesContainer.addView(itemView)
@@ -368,66 +267,95 @@ class AdminReservas : BaseActivity() {
     }
     
     /**
-     * Aprueba una solicitud de reserva usando la API del backend
+     * Aprueba una solicitud y bloquea el espacio en el calendario.
+     * Crea una reserva confirmada en el sistema.
+     * 
+     * TODO: Enviar notificación por correo al residente
+     * TODO: Actualizar base de datos
      */
-    private fun aprobarSolicitudBackend(solicitud: ReservaBackend) {
+    private fun aprobarSolicitud(solicitud: SolicitudReserva) {
         val detalles = StringBuilder()
         detalles.append("Residente: ${solicitud.residente}\n")
-        detalles.append("Espacio: ${solicitud.zona}\n")
-        detalles.append("Fecha: ${solicitud.fecha}\n")
-        detalles.append("Horario: ${solicitud.horaInicio} - ${solicitud.horaFin}\n")
-        detalles.append("Cantidad: ${solicitud.numeroPersonas} personas\n")
+        detalles.append("Espacio: ${solicitud.espacio}\n")
+        detalles.append("Fecha: ${dateFormat.format(solicitud.fecha)}\n")
+        detalles.append("Horario: ${timeFormat.format(solicitud.horaInicio)} - ${timeFormat.format(solicitud.horaFin)}\n")
+        detalles.append("Cantidad: ${solicitud.cantidad} personas\n")
+        if (solicitud.observaciones.isNotBlank()) {
+            detalles.append("Observaciones: ${solicitud.observaciones}\n")
+        }
         
         AlertDialog.Builder(this)
             .setTitle("Aprobar solicitud")
             .setMessage("${detalles}\n¿Deseas aprobar esta solicitud?")
             .setPositiveButton("Aprobar") { _, _ ->
-                lifecycleScope.launch {
-                    try {
-                        val request = ActualizarReservaRequest(estado = "aprobada")
-                        val response = RetrofitClient.reservasApi.actualizarReserva(solicitud.id, request)
-                        
-                        if (response.isSuccessful) {
-                            Toast.makeText(
-                                this@AdminReservas,
-                                "✓ Solicitud aprobada y espacio bloqueado",
-                                Toast.LENGTH_LONG
-                            ).show()
-                            
-                            // Recargar solicitudes y calendario desde backend
-                            loadSolicitudesPendientes()
-                            cargarReservasAprobadasDesdeBackend()
-                        } else {
-                            Toast.makeText(
-                                this@AdminReservas,
-                                "Error al aprobar: ${response.message()}",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                    } catch (e: Exception) {
-                        Toast.makeText(
-                            this@AdminReservas,
-                            "Error de conexión: ${e.message}",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        e.printStackTrace()
-                    }
+                // Verificar conflictos con reservas confirmadas
+                val conflicto = verificarConflictoReservas(solicitud)
+                if (conflicto != null) {
+                    Toast.makeText(
+                        this,
+                        "⚠️ Conflicto detectado: Ya existe una reserva confirmada para ${solicitud.espacio} el ${dateFormat.format(solicitud.fecha)} de ${conflicto.horaInicio} a ${conflicto.horaFinal}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    return@setPositiveButton
                 }
+                
+                // Crear reserva confirmada en el sistema
+                val horaInicioStr = timeFormat.format(solicitud.horaInicio)
+                val horaFinStr = timeFormat.format(solicitud.horaFin)
+                
+                val reserva = ReservaLight(
+                    espacio = solicitud.espacio,
+                    fecha = solicitud.fecha,
+                    horaInicio = horaInicioStr,
+                    horaFinal = horaFinStr,
+                    cantidad = solicitud.cantidad,
+                    creador = solicitud.residente
+                )
+                
+                // Agregar a la lista de reservas confirmadas
+                ReservasConfirmadasManager.agregarReserva(reserva)
+                
+                // Marcar como aprobada en el gestor de solicitudes
+                SolicitudesManager.aprobarSolicitud(solicitud)
+                
+                Toast.makeText(this, "✓ Solicitud aprobada y espacio bloqueado", Toast.LENGTH_LONG).show()
+                
+                // TODO: Sistema de notificación por correo electrónico - APROBACIÓN
+                // Una vez que se emita la aprobación, el sistema debe generar y enviar
+                // automáticamente una notificación por correo electrónico al residente.
+                // El correo debe incluir:
+                // - Nombre del espacio: ${solicitud.espacio}
+                // - Nombre del residente: ${solicitud.residente}
+                // - Fecha de la reserva: ${dateFormat.format(solicitud.fecha)}
+                // - Hora de la reserva: ${timeFormat.format(solicitud.horaInicio)} - ${timeFormat.format(solicitud.horaFin)}
+                // - Cantidad de personas: ${solicitud.cantidad}
+                // - Estado de la solicitud: APROBADA
+                // Considerar integración con servicio de email (SMTP, SendGrid, etc.)
+                
+                // Recargar vistas
+                loadSolicitudesPendientes()
+                generateMonthDays()
             }
             .setNegativeButton("Cancelar", null)
             .show()
     }
     
     /**
-     * Rechaza una solicitud de reserva usando la API del backend
+     * Rechaza una solicitud solicitando la razón del rechazo.
+     * 
+     * TODO: Enviar notificación por correo al residente con la razón
+     * TODO: Actualizar base de datos
      */
-    private fun rechazarSolicitudBackend(solicitud: ReservaBackend) {
+    private fun rechazarSolicitud(solicitud: SolicitudReserva) {
         val detalles = StringBuilder()
         detalles.append("Residente: ${solicitud.residente}\n")
-        detalles.append("Espacio: ${solicitud.zona}\n")
-        detalles.append("Fecha: ${solicitud.fecha}\n")
-        detalles.append("Horario: ${solicitud.horaInicio} - ${solicitud.horaFin}\n")
-        detalles.append("Cantidad: ${solicitud.numeroPersonas} personas\n")
+        detalles.append("Espacio: ${solicitud.espacio}\n")
+        detalles.append("Fecha: ${dateFormat.format(solicitud.fecha)}\n")
+        detalles.append("Horario: ${timeFormat.format(solicitud.horaInicio)} - ${timeFormat.format(solicitud.horaFin)}\n")
+        detalles.append("Cantidad: ${solicitud.cantidad} personas\n")
+        if (solicitud.observaciones.isNotBlank()) {
+            detalles.append("Observaciones: ${solicitud.observaciones}")
+        }
         
         val inputEditText = EditText(this).apply {
             hint = "Razón del rechazo"
@@ -446,36 +374,27 @@ class AdminReservas : BaseActivity() {
                     return@setPositiveButton
                 }
                 
-                lifecycleScope.launch {
-                    try {
-                        // Eliminar la reserva directamente del backend
-                        val response = RetrofitClient.reservasApi.eliminarReserva(solicitud.id)
-                        
-                        if (response.isSuccessful) {
-                            Toast.makeText(
-                                this@AdminReservas,
-                                "✓ Solicitud rechazada y eliminada: $razon",
-                                Toast.LENGTH_LONG
-                            ).show()
-                            
-                            // Recargar solicitudes
-                            loadSolicitudesPendientes()
-                        } else {
-                            Toast.makeText(
-                                this@AdminReservas,
-                                "Error al rechazar: ${response.message()}",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        }
-                    } catch (e: Exception) {
-                        Toast.makeText(
-                            this@AdminReservas,
-                            "Error de conexión: ${e.message}",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        e.printStackTrace()
-                    }
-                }
+                // Marcar como rechazada con razón
+                SolicitudesManager.rechazarSolicitud(solicitud, razon)
+                
+                Toast.makeText(this, "✓ Solicitud rechazada: $razon", Toast.LENGTH_LONG).show()
+                
+                // TODO: Sistema de notificación por correo electrónico - RECHAZO
+                // Una vez que se emita el rechazo, el sistema debe generar y enviar
+                // automáticamente una notificación por correo electrónico al residente.
+                // El correo debe incluir:
+                // - Nombre del espacio: ${solicitud.espacio}
+                // - Nombre del residente: ${solicitud.residente}
+                // - Fecha de la reserva solicitada: ${dateFormat.format(solicitud.fecha)}
+                // - Hora de la reserva solicitada: ${timeFormat.format(solicitud.horaInicio)} - ${timeFormat.format(solicitud.horaFin)}
+                // - Cantidad de personas: ${solicitud.cantidad}
+                // - Estado de la solicitud: RECHAZADA
+                // - Razón del rechazo proporcionada por el administrador: $razon
+                // Considerar integración con servicio de email (SMTP, SendGrid, etc.)
+                
+                // Recargar vistas
+                loadSolicitudesPendientes()
+                generateMonthDays()
             }
             .setNegativeButton("Cancelar", null)
             .show()

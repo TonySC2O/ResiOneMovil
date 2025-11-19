@@ -9,7 +9,7 @@ const validarFecha = (fecha) => {
 
 // Crear reporte
 const crearReporte = async (req, res) => {
-  const { tipo, descripcion, nivelPrioridad, correoResidente } = req.body;
+  const { tipo, descripcion, nivelPrioridad, archivos, correoResidente } = req.body;
   const fecha = new Date().toISOString().split("T")[0];
 
   if (!tipo || !descripcion || !nivelPrioridad || !correoResidente) {
@@ -21,17 +21,11 @@ const crearReporte = async (req, res) => {
   }
 
   try {
-    // Procesar archivos subidos
-    let archivosUrls = [];
-    if (req.files && req.files.length > 0) {
-      archivosUrls = req.files.map(file => `/uploads/reportes/${file.filename}`);
-    }
-
     const nuevoReporte = new Reporte({
       tipo,
       descripcion,
       nivelPrioridad,
-      archivos: archivosUrls,
+      archivos,
       fecha,
       estado: "Pendiente",
       seguimiento: "R" + Math.floor(Math.random() * 100000),

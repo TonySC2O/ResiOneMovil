@@ -29,8 +29,22 @@
         android:title="Inicio"
         app:showAsAction="never" />
     <item
+        android:id="@+id/action_visient"
+        android:orderInCategory="6"
+        android:title="Visitas"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_mantenimiento"
+        android:orderInCategory="7"
+        android:title="Registrar Mantenimiento"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
         android:title="@string/action_settings"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_chatbot"
+        android:title="ResiBot"
+        app:showAsAction="ifRoom|withText" />
 </menu>

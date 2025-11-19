@@ -8,14 +8,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.resionemobile.BaseActivity
 import com.example.resionemobile.R
-import api.CrearReservaRequest
-import api.RetrofitClient
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -316,7 +312,7 @@ class ReservarEspacio : BaseActivity() {
             }
 
             // Todas las validaciones pasaron — preparar la reserva con el creador actual. IMPORTANTE CAMBIARLO A BASE DE DATOS EN MONGODB
-            val reserva = ReservaLight("", espacio, fechaDate, horaInicio, horaFinal, cantidad, currentUser)  // ID temporal, se asignará al guardar en backend
+            val reserva = ReservaLight(espacio, fechaDate, horaInicio, horaFinal, cantidad, currentUser)
 
             // ============ DETECCIÓN DE CONFLICTOS DE HORARIO ============
             // Verificar si existe solapamiento con otras reservas en el mismo día y espacio
@@ -362,139 +358,41 @@ class ReservarEspacio : BaseActivity() {
             calFin.set(Calendar.HOUR_OF_DAY, horaFinalParts[0].toInt())
             calFin.set(Calendar.MINUTE, horaFinalParts[1].toInt())
 
-            // Crear solicitud en el backend
-            crearSolicitudEnBackend(espacio, fechaDate, horaInicio, horaFinal, cantidad)
+            // Crear solicitud pendiente (ya no se guarda directamente como reserva)
+            val solicitud = SolicitudReserva(
+                espacio = espacio,
+                residente = currentUser,
+                fecha = fechaDate,
+                horaInicio = calInicio.time,
+                horaFin = calFin.time,
+                cantidad = cantidad,
+                observaciones = ""  // Se puede agregar campo de observaciones al formulario si se desea
+            )
+            
+            // Guardar solicitud en el gestor de solicitudes
+            SolicitudesManager.agregarSolicitud(solicitud)
+            
+            Toast.makeText(this, "✓ Solicitud enviada. Esperando aprobación del administrador", Toast.LENGTH_LONG).show()
+
+            // Limpiar campos del formulario
+            etFecha.text.clear()
+            etHoraInicio.text.clear()
+            etHoraFinal.text.clear()
+            etCantidad.text.clear()
+            
+            // Refrescar colores del calendario para mostrar solicitudes pendientes
+            adapter.updateDays(generateMonthDays(currentMonthCalendar))
         }
 
         // ============ CONFIGURACIÓN DEL BOTÓN DE CAMBIO DE USUARIO (SIMULACIÓN) ============
         // Configurar botón de simulación de cambio de usuario heredado de BaseActivity
         // NOTA: Este botón es SOLO para testing y debe ser removido en producción
         setupUserSwitchButton(R.id.btn_switch_user)
-        
-        // Cargar reservas aprobadas desde el backend al iniciar
-        cargarReservasDesdeBackend()
-    }
-    
-    override fun onResume() {
-        super.onResume()
-        // Recargar reservas cada vez que se vuelve a la pantalla
-        cargarReservasDesdeBackend()
-    }
-    
-    /**
-     * Crea una solicitud de reserva en el backend usando la API
-     */
-    private fun crearSolicitudEnBackend(
-        espacio: String, 
-        fecha: Date, 
-        horaInicio: String, 
-        horaFinal: String, 
-        cantidad: Int
-    ) {
-        lifecycleScope.launch {
-            try {
-                // Convertir fecha a formato ISO (YYYY-MM-DD)
-                val fechaISO = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(fecha)
-                
-                val request = CrearReservaRequest(
-                    zona = espacio,
-                    fecha = fechaISO,
-                    horaInicio = horaInicio,
-                    horaFin = horaFinal,
-                    numeroPersonas = cantidad,
-                    creador = "USER_ID_${currentUser}",  // TODO: Reemplazar con ID real del usuario cuando exista login
-                    residente = currentUser,
-                    correoResidente = "$currentUser@resione.com"
-                )
-                
-                val response = RetrofitClient.reservasApi.crearReserva(request)
-                
-                if (response.isSuccessful && response.body() != null) {
-                    Toast.makeText(
-                        this@ReservarEspacio,
-                        "✓ Solicitud enviada. Esperando aprobación del administrador",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    
-                    // Limpiar campos del formulario
-                    etFecha.text.clear()
-                    etHoraInicio.text.clear()
-                    etHoraFinal.text.clear()
-                    etCantidad.text.clear()
-                    
-                    // Refrescar calendario
-                    cargarReservasDesdeBackend()
-                    
-                } else {
-                    Toast.makeText(
-                        this@ReservarEspacio,
-                        "Error al crear solicitud: ${response.message()}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-                
-            } catch (e: Exception) {
-                Toast.makeText(
-                    this@ReservarEspacio,
-                    "Error de conexión: ${e.message}",
-                    Toast.LENGTH_LONG
-                ).show()
-                e.printStackTrace()
-            }
-        }
-    }
-    
-    /**
-     * Carga todas las reservas aprobadas desde el backend y actualiza el calendario
-     */
-    private fun cargarReservasDesdeBackend() {
-        lifecycleScope.launch {
-            try {
-                // Obtener solo reservas aprobadas para mostrar en el calendario
-                val response = RetrofitClient.reservasApi.obtenerReservasAprobadas()
-                
-                if (response.isSuccessful && response.body() != null) {
-                    val reservasBackend = response.body()!!
-                    
-                    // Limpiar manager local y agregar reservas del backend
-                    ReservasConfirmadasManager.limpiar()
-                    
-                    reservasBackend.forEach { reservaBackend ->
-                        try {
-                            // Convertir fecha ISO a Date
-                            val fecha = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                                .parse(reservaBackend.fecha)
-                            
-                            if (fecha != null) {
-                                val reservaLocal = ReservaLight(
-                                    id = reservaBackend.id,      // Preservar el _id de MongoDB
-                                    espacio = reservaBackend.zona,
-                                    fecha = fecha,
-                                    horaInicio = reservaBackend.horaInicio,
-                                    horaFinal = reservaBackend.horaFin,
-                                    cantidad = reservaBackend.numeroPersonas,
-                                    creador = reservaBackend.residente
-                                )
-                                ReservasConfirmadasManager.agregarReserva(reservaLocal)
-                            }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    }
-                    
-                    // Actualizar calendario
-                    adapter.updateDays(generateMonthDays(currentMonthCalendar))
-                }
-                
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
     }
 
     /**
-     * Muestra un diálogo con la lista de reservas confirmadas para un día específico.
-     * Solo muestra reservas aprobadas cargadas desde MongoDB.
+     * Muestra un diálogo con la lista de reservas confirmadas y solicitudes pendientes para un día específico.
+     * Si no hay reservas ni solicitudes, muestra mensaje informativo.
      * Al seleccionar una reserva de la lista, abre el diálogo de detalles.
      * 
      * @param day El día del calendario seleccionado por el usuario
@@ -502,34 +400,77 @@ class ReservarEspacio : BaseActivity() {
     private fun showReservationsForDay(day: CalendarDay) {
         val key = keyFormat.format(day.date)
         
-        // Obtener reservas confirmadas desde el backend
+        // Obtener reservas confirmadas
         val reservasConfirmadas = ReservasConfirmadasManager.obtenerReservas()
             .filter { keyFormat.format(it.fecha) == key }
         
-        if (reservasConfirmadas.isEmpty()) {
+        // Obtener solicitudes pendientes
+        val solicitudesPendientes = SolicitudesManager.obtenerSolicitudesPendientes()
+            .filter { keyFormat.format(it.fecha) == key }
+        
+        if (reservasConfirmadas.isEmpty() && solicitudesPendientes.isEmpty()) {
             AlertDialog.Builder(this)
                 .setTitle("Sin reservas")
-                .setMessage("No hay reservas confirmadas para este día")
+                .setMessage("No hay reservas ni solicitudes para este día")
                 .setPositiveButton("OK", null)
                 .show()
             return
         }
 
-        // Crear lista de labels para reservas confirmadas
-        val labels = reservasConfirmadas.map { 
+        // Crear lista combinada de labels
+        val labelsReservas = reservasConfirmadas.map { 
             "✓ ${it.horaInicio}-${it.horaFinal} • ${it.espacio} • ${it.cantidad}p (Confirmada)" 
-        }.toTypedArray()
+        }
+        val labelsSolicitudes = solicitudesPendientes.map {
+            val horaInicio = timeFormat.format(it.horaInicio)
+            val horaFin = timeFormat.format(it.horaFin)
+            "⏳ $horaInicio-$horaFin • ${it.espacio} • ${it.cantidad}p (Pendiente)"
+        }
+        val labels = (labelsReservas + labelsSolicitudes).toTypedArray()
 
         AlertDialog.Builder(this)
             .setTitle("Reservas: ${day.dayNumber}")
             .setItems(labels) { _, which ->
-                val selected = reservasConfirmadas[which]
-                showReservationDetailDialog(selected)
+                if (which < reservasConfirmadas.size) {
+                    // Es una reserva confirmada
+                    val selected = reservasConfirmadas[which]
+                    showReservationDetailDialog(selected)
+                } else {
+                    // Es una solicitud pendiente
+                    val solicitudIndex = which - reservasConfirmadas.size
+                    val solicitud = solicitudesPendientes[solicitudIndex]
+                    showSolicitudDetailDialog(solicitud)
+                }
             }
             .setPositiveButton("Cerrar", null)
             .show()
     }
     
+    /**
+     * Muestra diálogo con detalles de una solicitud pendiente.
+     * Los residentes solo pueden ver el estado, no pueden cancelarla una vez enviada.
+     * 
+     * @param solicitud La solicitud a mostrar
+     */
+    private fun showSolicitudDetailDialog(solicitud: SolicitudReserva) {
+        val details = StringBuilder()
+        details.append("Estado: PENDIENTE DE APROBACIÓN\n\n")
+        details.append("Solicitante: ${solicitud.residente}\n")
+        details.append("Espacio: ${solicitud.espacio}\n")
+        details.append("Fecha: ${dateFormat.format(solicitud.fecha)}\n")
+        details.append("Hora: ${timeFormat.format(solicitud.horaInicio)} - ${timeFormat.format(solicitud.horaFin)}\n")
+        details.append("Cantidad: ${solicitud.cantidad} personas\n")
+        if (solicitud.observaciones.isNotBlank()) {
+            details.append("Observaciones: ${solicitud.observaciones}")
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Solicitud Pendiente")
+            .setMessage(details.toString())
+            .setPositiveButton("Cerrar", null)
+            .show()
+    }
+
     /**
      * Muestra diálogo con detalles completos de una reserva.
      * Incluye información del creador, espacio, horario y cantidad de personas.
@@ -620,37 +561,17 @@ class ReservarEspacio : BaseActivity() {
                     .setPositiveButton("Sí, cancelar") { _, _ ->
                         // TODO: Aquí se debe enviar código SMS para validar la cancelación
                         
-                        // Eliminar reserva del backend
-                        lifecycleScope.launch {
-                            try {
-                                val response = RetrofitClient.reservasApi.eliminarReserva(reserva.id)
-                                if (response.isSuccessful) {
-                                    // Mostrar advertencia de cancelación tardía
-                                    // TODO: Aquí se debe enviar correo electrónico notificando cancelación tardía
-                                    Toast.makeText(
-                                        this@ReservarEspacio, 
-                                        "⚠️ Reserva cancelada (TARDÍA). Se ha registrado esta cancelación.", 
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                    
-                                    // Recargar desde backend
-                                    cargarReservasDesdeBackend()
-                                } else {
-                                    Toast.makeText(
-                                        this@ReservarEspacio,
-                                        "Error al cancelar reserva",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                Toast.makeText(
-                                    this@ReservarEspacio,
-                                    "Error de conexión: ${e.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
+                        // Eliminar reserva
+                        ReservasConfirmadasManager.eliminarReserva(reserva)
+                        adapter.updateDays(generateMonthDays(currentMonthCalendar))
+                        
+                        // Mostrar advertencia de cancelación tardía
+                        // TODO: Aquí se debe enviar correo electrónico notificando cancelación tardía
+                        Toast.makeText(
+                            this, 
+                            "⚠️ Reserva cancelada (TARDÍA). Se ha registrado esta cancelación.", 
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                     .setNegativeButton("No, mantener reserva", null)
                     .show()
@@ -666,35 +587,11 @@ class ReservarEspacio : BaseActivity() {
                     .setPositiveButton("Sí, cancelar") { _, _ ->
                         // TODO: Aquí se debe enviar código SMS para validar la cancelación
                         
-                        // Eliminar reserva del backend
-                        lifecycleScope.launch {
-                            try {
-                                val response = RetrofitClient.reservasApi.eliminarReserva(reserva.id)
-                                if (response.isSuccessful) {
-                                    Toast.makeText(
-                                        this@ReservarEspacio,
-                                        "✓ Reserva cancelada exitosamente",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    
-                                    // Recargar desde backend
-                                    cargarReservasDesdeBackend()
-                                } else {
-                                    Toast.makeText(
-                                        this@ReservarEspacio,
-                                        "Error al cancelar reserva",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                Toast.makeText(
-                                    this@ReservarEspacio,
-                                    "Error de conexión: ${e.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
+                        // Eliminar reserva
+                        ReservasConfirmadasManager.eliminarReserva(reserva)
+                        adapter.updateDays(generateMonthDays(currentMonthCalendar))
+                        
+                        Toast.makeText(this, "✓ Reserva cancelada exitosamente", Toast.LENGTH_SHORT).show()
                     }
                     .setNegativeButton("No", null)
                     .show()
@@ -798,41 +695,16 @@ class ReservarEspacio : BaseActivity() {
                     return@setPositiveButton
                 }
 
-                // ============ APLICAR CAMBIOS EN BACKEND ============
+                // ============ APLICAR CAMBIOS ============
                 // Normalizar tiempos de "hh-mm" a "HH:mm" para almacenamiento consistente
+                // Eliminar la reserva antigua y agregar la actualizada
+                ReservasConfirmadasManager.eliminarReserva(reserva)
                 val saveInicio = normalize(newHoraInicio)  // Convierte "09-30" a "09:30"
                 val saveFinal = normalize(newHoraFinal)
-                
-                // Llamar al backend para actualizar la reserva en MongoDB
-                lifecycleScope.launch {
-                    try {
-                        // Convertir fecha a formato ISO
-                        val fechaISO = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(reserva.fecha)
-                        
-                        val request = ActualizarReservaRequest(
-                            zona = newEspacio,
-                            fecha = fechaISO,
-                            horaInicio = saveInicio,
-                            horaFin = saveFinal,
-                            numeroPersonas = newCant
-                        )
-                        
-                        val response = RetrofitClient.reservasApi.actualizarReserva(reserva.id, request)
-                        
-                        if (response.isSuccessful) {
-                            Toast.makeText(ctx, "✓ Reserva actualizada exitosamente", Toast.LENGTH_SHORT).show()
-                            
-                            // Recargar reservas desde el backend
-                            cargarReservasDesdeBackend()
-                        } else {
-                            val errorMsg = response.errorBody()?.string() ?: "Error desconocido"
-                            Toast.makeText(ctx, "Error al actualizar: $errorMsg", Toast.LENGTH_LONG).show()
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        Toast.makeText(ctx, "Error de conexión: ${e.message}", Toast.LENGTH_LONG).show()
-                    }
-                }
+                val reservaActualizada = reserva.copy(espacio = newEspacio, horaInicio = saveInicio, horaFinal = saveFinal, cantidad = newCant)
+                ReservasConfirmadasManager.agregarReserva(reservaActualizada)
+                adapter.updateDays(generateMonthDays(currentMonthCalendar))  // Refrescar calendario
+                Toast.makeText(ctx, "Reserva actualizada", Toast.LENGTH_SHORT).show()
 
                 dialog.dismiss()
             }
@@ -896,12 +768,13 @@ class ReservarEspacio : BaseActivity() {
         val key = keyFormat.format(date)
         val hasReservaConfirmada = ReservasConfirmadasManager.obtenerReservas()
             .any { keyFormat.format(it.fecha) == key }
+        val hasSolicitudPendiente = SolicitudesManager.obtenerSolicitudesPendientes()
+            .any { keyFormat.format(it.fecha) == key }
         
-        // Solo mostrar estado basado en reservas aprobadas del backend
         return if (!date.after(today) && !isSameDay(date, today)) {
             if (hasReservaConfirmada) ReservaStatus.COMPLETED else ReservaStatus.NONE
         } else {
-            if (hasReservaConfirmada) ReservaStatus.PENDING else ReservaStatus.NONE
+            if (hasReservaConfirmada || hasSolicitudPendiente) ReservaStatus.PENDING else ReservaStatus.NONE
         }
     }
 
@@ -935,7 +808,6 @@ class ReservarEspacio : BaseActivity() {
  * @property creador Nombre del usuario que creó la reserva (para control de permisos)
  */
 data class ReservaLight(
-    val id: String,              // MongoDB _id para actualizar en backend
     val espacio: String,
     val fecha: Date,
     val horaInicio: String,

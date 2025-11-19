@@ -16,18 +16,8 @@ import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.lifecycle.lifecycleScope
 import com.example.resionemobile.BaseActivity
 import com.example.resionemobile.R
-import api.CrearReporteRequest
-import api.RetrofitClient
-import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.File
-import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -124,119 +114,42 @@ class CrearReporte : BaseActivity() {
                 return@setOnClickListener
             }
 
-            // Crear reporte en el backend usando API
-            crearReporteEnBackend(tipo, descripcion, prioridad)
+            // Generate tracking number
+            val numeroSeguimiento = ReportesManager.generarNumeroSeguimiento()
+
+            // Crear y guardar el reporte en memoria
+            val nuevoReporte = ReporteData(
+                numeroSeguimiento = numeroSeguimiento,
+                tipo = tipo,
+                descripcion = descripcion,
+                prioridad = prioridad,
+                fecha = selectedDate!!,
+                archivosMultimedia = attachedUris.toList(),
+                creador = currentUser,  // Usuario que crea el reporte
+                estado = ReporteEstado.PENDIENTE,
+                tecnicoAsignado = null  // Sin técnico al crear
+            )
+            
+            ReportesManager.agregarReporte(nuevoReporte)
+            
+            Toast.makeText(this, "✓ Reporte creado exitosamente\nNúmero de seguimiento: $numeroSeguimiento", Toast.LENGTH_LONG).show()
+            
+            // Limpiar campos después de crear
+            etDescripcion.text.clear()
+            etFechaReporte.text.clear()
+            selectedDate = null
+            attachedUris.clear()
+            showThumbnails()
+            
+            // Opcional: navegar a la pantalla de Ver Reportes
+            // val intent = Intent(this, Reportes::class.java)
+            // startActivity(intent)
         }
         
         // ============ CONFIGURACIÓN DEL BOTÓN DE CAMBIO DE USUARIO (SIMULACIÓN) ============
         // Configurar botón de simulación de cambio de usuario heredado de BaseActivity
         // NOTA: Este botón es SOLO para testing y debe ser removido en producción
         setupUserSwitchButton(R.id.btn_switch_user_reporte)
-    }
-    
-    /**
-     * Envía el reporte al backend usando Retrofit con archivos adjuntos
-     */
-    private fun crearReporteEnBackend(tipo: String, descripcion: String, prioridad: String) {
-        lifecycleScope.launch {
-            try {
-                val response = if (attachedUris.isNotEmpty()) {
-                    // Crear reporte con archivos adjuntos
-                    crearReporteConArchivos(tipo, descripcion, prioridad)
-                } else {
-                    // Crear reporte sin archivos (JSON simple)
-                    val request = CrearReporteRequest(
-                        tipo = tipo,
-                        descripcion = descripcion,
-                        nivelPrioridad = prioridad,
-                        archivos = emptyList(),
-                        correoResidente = "$currentUser@resione.com"
-                    )
-                    RetrofitClient.reportesApi.crearReporte(request)
-                }
-                
-                if (response.isSuccessful && response.body() != null) {
-                    val resultado = response.body()!!
-                    val numeroSeguimiento = resultado.reporte.seguimiento
-                    
-                    // Mostrar éxito
-                    Toast.makeText(
-                        this@CrearReporte,
-                        "✓ Reporte creado exitosamente\nNúmero de seguimiento: $numeroSeguimiento",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    
-                    // Limpiar campos
-                    findViewById<EditText>(R.id.et_descripcion).text.clear()
-                    findViewById<EditText>(R.id.et_fecha_reporte).text.clear()
-                    selectedDate = null
-                    attachedUris.clear()
-                    showThumbnails()
-                    
-                } else {
-                    Toast.makeText(
-                        this@CrearReporte,
-                        "Error al crear reporte: ${response.message()}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-                
-            } catch (e: Exception) {
-                Toast.makeText(
-                    this@CrearReporte,
-                    "Error de conexión: ${e.message}\nVerifica que el servidor esté corriendo",
-                    Toast.LENGTH_LONG
-                ).show()
-                e.printStackTrace()
-            }
-        }
-    }
-    
-    /**
-     * Crea un reporte con archivos adjuntos usando multipart
-     */
-    private suspend fun crearReporteConArchivos(tipo: String, descripcion: String, prioridad: String): retrofit2.Response<api.CrearReporteResponse> {
-        // Preparar campos de texto como RequestBody
-        val tipoBody = tipo.toRequestBody("text/plain".toMediaTypeOrNull())
-        val descripcionBody = descripcion.toRequestBody("text/plain".toMediaTypeOrNull())
-        val prioridadBody = prioridad.toRequestBody("text/plain".toMediaTypeOrNull())
-        val correoBody = "$currentUser@resione.com".toRequestBody("text/plain".toMediaTypeOrNull())
-        
-        // Preparar archivos como MultipartBody.Part
-        val archivosParts = mutableListOf<MultipartBody.Part>()
-        
-        for (uri in attachedUris) {
-            try {
-                // Copiar archivo de URI a archivo temporal
-                val inputStream = contentResolver.openInputStream(uri)
-                if (inputStream != null) {
-                    val file = File(cacheDir, "upload_${System.currentTimeMillis()}.tmp")
-                    val outputStream = FileOutputStream(file)
-                    inputStream.copyTo(outputStream)
-                    inputStream.close()
-                    outputStream.close()
-                    
-                    // Determinar tipo MIME
-                    val mimeType = contentResolver.getType(uri) ?: "application/octet-stream"
-                    
-                    // Crear RequestBody y MultipartBody.Part
-                    val requestBody = file.asRequestBody(mimeType.toMediaTypeOrNull())
-                    val part = MultipartBody.Part.createFormData("archivos", file.name, requestBody)
-                    archivosParts.add(part)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-        
-        // Hacer petición con archivos
-        return RetrofitClient.reportesApi.crearReporteConArchivos(
-            tipoBody,
-            descripcionBody,
-            prioridadBody,
-            correoBody,
-            archivosParts
-        )
     }
 
     private fun showThumbnails() {
