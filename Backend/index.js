@@ -7,6 +7,7 @@ const reporteRoutes = require('./routes/reporteRoutes');
 const comunicadosRoutes = require('./routes/comunicadosRoutes');
 const finanzaRoutes = require("./routes/finanzaRoutes");
 const seguridadRoutes = require("./routes/seguridadRoutes");
+const bitacoraRoutes = require("./routes/mantenimientoRoutes");
 
 
 const app = express();
@@ -31,6 +32,7 @@ app.use('/api/reservas', reservaRoutes);
 app.use('/api/reportes', reporteRoutes);
 app.use("/api/finanzas", finanzaRoutes);
 app.use("/api/visitas", seguridadRoutes);
+app.use("/api/bitacoras", bitacoraRoutes);
 
 // Servidor
 app.listen(PORT, "0.0.0.0", () => console.log(`Servidor corriendo en puerto ${PORT}`));

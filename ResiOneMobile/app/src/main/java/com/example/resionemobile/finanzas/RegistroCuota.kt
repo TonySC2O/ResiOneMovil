@@ -1,5 +1,6 @@
-package Finanzas
+package com.example.resionemobile.finanzas
 
+import android.R
 import android.app.DatePickerDialog
 import android.os.Bundle
 import android.widget.ArrayAdapter
@@ -33,8 +34,8 @@ class RegistroCuota : AppCompatActivity() {
 
     private fun setupSpinner() {
         val estados = arrayOf("Pendiente", "Cancelado", "Atrasado")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, estados)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val adapter = ArrayAdapter(this, R.layout.simple_spinner_item, estados)
+        adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
         binding.spinnerEstado.adapter = adapter
     }
 

@@ -5,14 +5,14 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import Finanzas.RegistroCuota
 import Reportes.CrearReporte
 import Reportes.Reportes
 import Reservas.AdminReservas
 import Reservas.ReservarEspacio
-import Seguridad.RegistroEntrada
-import Seguridad.RegistroSalida
-import com.example.resionemobile.ChatBot.ChatBotActivity
+import com.example.resionemobile.seguridad.RegistroEntrada
+import com.example.resionemobile.seguridad.RegistroSalida
+import com.example.resionemobile.chatbot.ChatBotActivity
+import com.example.resionemobile.mantenimiento.RegistrarMantenimiento
 
 
 /**
@@ -75,8 +75,8 @@ abstract class BaseActivity : AppCompatActivity() {
                 navigateToVisiEntradas()
                 true
             }
-            R.id.action_visisal -> {
-                navigateToVisiSalidas()
+            R.id.action_mantenimiento -> {
+                navigateToRegMante()
                 true
             }
             R.id.action_settings -> {
@@ -137,8 +137,8 @@ abstract class BaseActivity : AppCompatActivity() {
      * Verifica que no estemos ya en esa pantalla antes de navegar.
      */
     private fun navigateToVisiEntradas() {
-        if (this is CrearReporte) {
-            Toast.makeText(this, "Ya estás en Visitas", Toast.LENGTH_SHORT).show()
+        if (this is RegistroEntrada) {
+            Toast.makeText(this, "Ya estás en Registro de Entradas", Toast.LENGTH_SHORT).show()
         } else {
             val intent = Intent(this, RegistroEntrada::class.java)
             startActivity(intent)
@@ -146,14 +146,14 @@ abstract class BaseActivity : AppCompatActivity() {
     }
 
     /**
-     * Navega a la pantalla de Registrar Salidas.
+     * Navega a la pantalla de Registrar Mantenimiento.
      * Verifica que no estemos ya en esa pantalla antes de navegar.
      */
-    private fun navigateToVisiSalidas() {
-        if (this is CrearReporte) {
-            Toast.makeText(this, "Ya estás en Visitas", Toast.LENGTH_SHORT).show()
+    private fun navigateToRegMante() {
+        if (this is RegistrarMantenimiento) {
+            Toast.makeText(this, "Ya estás en Mantenimiento", Toast.LENGTH_SHORT).show()
         } else {
-            val intent = Intent(this, RegistroSalida::class.java)
+            val intent = Intent(this, RegistrarMantenimiento::class.java)
             startActivity(intent)
         }
     }
@@ -168,7 +168,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
     // NUEVO MÉTODO: Navegación al Chatbot
     private fun navigateToChatbot() {
-        if (this is com.example.resionemobile.ChatBot.ChatBotActivity) {
+        if (this is com.example.resionemobile.chatbot.ChatBotActivity) {
             Toast.makeText(this, "Ya estás en ResiBot", Toast.LENGTH_SHORT).show()
         } else {
             startActivity(Intent(this, ChatBotActivity::class.java))

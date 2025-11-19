@@ -14,7 +14,6 @@ data class RegistroRequest(
     val codigoEmpleado: String? = null
 )
 
-
 data class GenericResponse(
     val mensaje: String
 )
@@ -94,12 +93,8 @@ data class EditarComunicadoRequest(
 )
 
 
-// ------------------------
-// Pagos y Finanzas
-// ------------------------
-
 data class Cuota(
-    val _id: String,
+    @SerializedName("_id") val id: String,
     val monto: Double,
     val fechaVencimiento: String,
     val unidadHabitacional: String,
@@ -127,7 +122,7 @@ data class CrearCuotaResponse(
 )
 
 data class Pago(
-    val _id: String,
+    @SerializedName("_id") val id: String,
     val cuotaId: String,
     val residenteId: String,
     val nombreResidente: String,
@@ -153,7 +148,7 @@ data class PagoRequest(
 )
 
 data class Factura(
-    val _id: String,
+    @SerializedName("_id") val id: String,
     val numeroFactura: String,
     val pagoId: String,
     val cuotaId: String,
@@ -169,10 +164,6 @@ data class FacturaResponse(
     val factura: Factura
 )
 
-
-// ------------------------
-// Seguridad y Acceso
-// ------------------------
 
 data class EntradaRequest(
     val visitanteId: String,
@@ -202,8 +193,9 @@ data class SalidaRequest(
     val fechaHoraSalida: String
 )
 
+
 data class BitacoraItem(
-    val id: String,
+    @SerializedName("_id") val id: String,
     val visitanteId: String,
     val nombre: String,
     val fechaHoraIngreso: String,
@@ -216,4 +208,36 @@ data class BitacoraItem(
 data class BitacoraResponse(
     val mensaje: String,
     val registros: List<BitacoraItem>
+)
+
+
+data class BitacoraMantenimiento(
+    @SerializedName("_id") val id: String,
+    val incidenciaAsociada: String,
+    val tipoMantenimiento: String,
+    val descripcion: String,
+    val responsable: String,
+    val fechaEjecucion: String,
+    val fotosAntes: List<String>,   // URLs de las imágenes
+    val fotosDespues: List<String>,
+    val observaciones: String?
+)
+
+data class MantenimientoRequest(
+    val incidenciaAsociada: String,
+    val tipoMantenimiento: String,
+    val descripcion: String,
+    val responsable: String,
+    val fechaEjecucion: String,
+    val observaciones: String?
+    // Las imágenes se enviarán por separado como Multipart
+)
+
+data class MantenimientoResponse(
+    val mensaje: String,
+    val mantenimiento: BitacoraMantenimiento
+)
+
+data class HistorialManteResponse(
+    val mantenimientos: List<BitacoraMantenimiento>
 )

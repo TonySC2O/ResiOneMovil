@@ -18,4 +18,9 @@
         <item>Media</item>
         <item>Alta</item>
     </string-array>
+    <string-array name="mantenimientos_array">
+        <item>Preventivo</item>
+        <item>Reparación</item>
+        <item>Correctivo</item>
+    </string-array>
 </resources>

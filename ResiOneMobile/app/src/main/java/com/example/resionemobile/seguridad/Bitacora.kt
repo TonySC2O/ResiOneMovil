@@ -1,4 +1,4 @@
-package Seguridad
+package com.example.resionemobile.seguridad
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -16,6 +16,7 @@ import com.example.resionemobile.api.BitacoraItem
 import com.example.resionemobile.api.BitacoraResponse
 import com.example.resionemobile.api.RetrofitClient
 import jxl.Workbook
+import jxl.write.Label
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -118,21 +119,21 @@ class Bitacora : AppCompatActivity() {
             )
 
             headers.forEachIndexed { index, title ->
-                sheet.addCell(jxl.write.Label(index, 0, title))
+                sheet.addCell(Label(index, 0, title))
             }
 
             // Datos
             registros.forEachIndexed { index, registro ->
                 val row = index + 1
 
-                sheet.addCell(jxl.write.Label(0, row, registro.id))
-                sheet.addCell(jxl.write.Label(1, row, registro.visitanteId))
-                sheet.addCell(jxl.write.Label(2, row, registro.nombre))
-                sheet.addCell(jxl.write.Label(3, row, registro.tipoVisita))
-                sheet.addCell(jxl.write.Label(4, row, registro.fechaHoraIngreso))
-                sheet.addCell(jxl.write.Label(5, row, registro.fechaHoraSalida ?: "N/A"))
-                sheet.addCell(jxl.write.Label(6, row, registro.placa ?: "N/A"))
-                sheet.addCell(jxl.write.Label(7, row, registro.residenteRelacionado ?: "N/A"))
+                sheet.addCell(Label(0, row, registro.id))
+                sheet.addCell(Label(1, row, registro.visitanteId))
+                sheet.addCell(Label(2, row, registro.nombre))
+                sheet.addCell(Label(3, row, registro.tipoVisita))
+                sheet.addCell(Label(4, row, registro.fechaHoraIngreso))
+                sheet.addCell(Label(5, row, registro.fechaHoraSalida ?: "N/A"))
+                sheet.addCell(Label(6, row, registro.placa ?: "N/A"))
+                sheet.addCell(Label(7, row, registro.residenteRelacionado ?: "N/A"))
             }
 
             workbook.write()

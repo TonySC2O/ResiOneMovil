@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="16dp"
-    tools:context="Seguridad.SeguridadMain">
+    tools:context=".seguridad.SeguridadMain">
 
     <TextView
         android:layout_width="wrap_content"

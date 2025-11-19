@@ -1,4 +1,4 @@
-package Finanzas
+package com.example.resionemobile.finanzas
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

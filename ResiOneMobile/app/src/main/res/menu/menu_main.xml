@@ -31,12 +31,12 @@
     <item
         android:id="@+id/action_visient"
         android:orderInCategory="6"
-        android:title="visitas"
+        android:title="Visitas"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_visisal"
+        android:id="@+id/action_mantenimiento"
         android:orderInCategory="7"
-        android:title="visitas"
+        android:title="Registrar Mantenimiento"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_settings"

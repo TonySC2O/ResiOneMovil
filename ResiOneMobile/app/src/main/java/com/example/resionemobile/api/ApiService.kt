@@ -1,15 +1,17 @@
 package com.example.resionemobile.api
 
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.http.Body
-import retrofit2.http.Path
-import retrofit2.http.POST
-import retrofit2.http.PUT
-import retrofit2.http.GET
 import retrofit2.http.DELETE
+import retrofit2.http.GET
 import retrofit2.http.Multipart
+import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.PartMap
+import retrofit2.http.Path
+import retrofit2.http.PUT
 import retrofit2.http.Query
 
 
@@ -23,7 +25,6 @@ interface ApiService {
     @PUT("editar")
     fun editar(@Body body: Map<String, @JvmSuppressWildcards Any>): Call<GenericResponse>
 
-    // --- COMUNICADOS (ajustadas a tu API actual) ---
     @GET("comunicados/feed")
     fun getComunicados(): Call<ComunicadoListResponse>
 
@@ -35,13 +36,6 @@ interface ApiService {
 
     @DELETE("comunicados/eliminar/{id}")
     fun eliminarComunicado(@Path("id") id: String): Call<GenericResponse>
-    @DELETE("posts/{id}")
-    fun deletePost(@Path("id") id: String): Call<GenericPostResponse>
-
-
-    // ------------------------
-    // Pagos y Finanzas
-    // ------------------------
 
     @POST("finanzas/cuotas")
     fun crearCuota(@Body body: CrearCuotaRequest): Call<CrearCuotaResponse>
@@ -69,11 +63,6 @@ interface ApiService {
     @POST("finanzas/facturas")
     fun emitirFactura(@Body body: Map<String, String>): Call<FacturaResponse>
 
-
-    // ------------------------
-    // Seguridad y Acceso
-    // ------------------------
-
     @POST("seguridad/entrada")
     fun registrarEntrada(@Body body: EntradaRequest): Call<EntradaResponse>
 
@@ -82,4 +71,15 @@ interface ApiService {
 
     @GET("seguridad/bitacora")
     fun obtenerBitacora(): Call<BitacoraResponse>
+
+    @Multipart
+    @POST("mantenimiento/registrar")
+    fun registrarMantenimiento(
+        @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>,
+        @Part fotosAntes: List<MultipartBody.Part>,
+        @Part fotosDespues: List<MultipartBody.Part>
+    ): Call<MantenimientoResponse>
+
+    @GET("mantenimiento/historial")
+    fun obtenerHistorialMante(): Call<HistorialManteResponse>
 }

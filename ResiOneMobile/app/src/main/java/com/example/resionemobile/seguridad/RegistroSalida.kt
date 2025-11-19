@@ -1,4 +1,4 @@
-package Seguridad
+package com.example.resionemobile.seguridad
 
 import android.Manifest
 import android.content.pm.PackageManager

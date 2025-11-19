@@ -1,4 +1,4 @@
-package com.example.resionemobile.ChatBot
+package com.example.resionemobile.chatbot
 import android.os.Bundle
 import com.example.resionemobile.BaseActivity
 import com.example.resionemobile.R

@@ -1,4 +1,4 @@
-package Finanzas
+package com.example.resionemobile.finanzas
 
 import android.R
 import android.app.DatePickerDialog
@@ -23,7 +23,6 @@ import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -113,7 +112,7 @@ class RegistroPago : AppCompatActivity() {
                     cuotasPendientes = todasLasCuotas.filter { it.estado == "Pendiente" || it.estado == "Atrasado" }
                     withContext(Dispatchers.Main) {
                         val displayItems = mutableListOf("Seleccione una cuota")
-                        displayItems.addAll(cuotasPendientes.map { "ID: ${it._id} - Monto: ${it.monto} - Vence: ${it.fechaVencimiento}" })
+                        displayItems.addAll(cuotasPendientes.map { "ID: ${it.id} - Monto: ${it.monto} - Vence: ${it.fechaVencimiento}" })
                         val adapter = ArrayAdapter(this@RegistroPago, R.layout.simple_spinner_item, displayItems)
                         adapter.setDropDownViewResource(R.layout.simple_spinner_dropdown_item)
                         binding.spinnerCuotasPendientes.adapter = adapter
@@ -169,7 +168,7 @@ class RegistroPago : AppCompatActivity() {
             try {
 
                 val response = RetrofitClient.api.registrarPago(
-                    cuotaId = selectedCuota!!._id,
+                    cuotaId = selectedCuota!!.id,
                     residenteId = residenteId,
                     nombreResidente = nombreResidente,
                     unidadHabitacional = selectedCuota!!.unidadHabitacional,

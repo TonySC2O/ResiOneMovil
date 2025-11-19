@@ -22,39 +22,19 @@
             android:label="Comunicados"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
-            android:name="Finanzas.RegistroCuota"
+            android:name=".finanzas.RegistroCuota"
             android:exported="true"
             android:label="Registrar Cuota"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
-            android:name="Finanzas.RegistroPago"
+            android:name=".finanzas.RegistroPago"
             android:exported="true"
             android:label="Registrar Pago"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
-            android:name="Finanzas.HistorialPagos"
+            android:name=".finanzas.HistorialPagos"
             android:exported="true"
             android:label="Historial de Pagos"
-            android:theme="@style/Theme.ResiOneMobile" />
-        <activity
-            android:name="Seguridad.SeguridadMain"
-            android:exported="true"
-            android:label="Seguridad"
-            android:theme="@style/Theme.ResiOneMobile" />
-        <activity
-            android:name="Seguridad.RegistroEntrada"
-            android:exported="true"
-            android:label="Registrar Entrada"
-            android:theme="@style/Theme.ResiOneMobile" />
-        <activity
-            android:name="Seguridad.RegistroSalida"
-            android:exported="true"
-            android:label="Registrar Salida"
-            android:theme="@style/Theme.ResiOneMobile" />
-        <activity
-            android:name="Seguridad.Bitacora"
-            android:exported="true"
-            android:label="Bitácora de Acceso"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
             android:name="Registro.CrearRegistro"
@@ -82,6 +62,36 @@
             android:label="@string/title_activity_crear_reporte"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
+            android:name=".seguridad.SeguridadMain"
+            android:exported="true"
+            android:label="Seguridad"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name=".seguridad.RegistroEntrada"
+            android:exported="true"
+            android:label="Registrar Entrada"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name=".seguridad.RegistroSalida"
+            android:exported="true"
+            android:label="Registrar Salida"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name=".seguridad.Bitacora"
+            android:exported="true"
+            android:label="Bitácora de Acceso"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name=".mantenimiento.RegistrarMantenimiento"
+            android:exported="true"
+            android:label="Registrar Mantenimiento"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name=".mantenimiento.HistorialMantenimientos"
+            android:exported="true"
+            android:label="Historial de Mantenimientos"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.ResiOneMobile">
@@ -93,7 +103,7 @@
         </activity>
 
         <activity
-            android:name="com.example.resionemobile.ChatBot.ChatBotActivity"
+            android:name="com.example.resionemobile.chatbot.ChatBotActivity"
             android:exported="false"
             android:label="ResiBot - Asistente"
             android:parentActivityName=".MainActivity" />

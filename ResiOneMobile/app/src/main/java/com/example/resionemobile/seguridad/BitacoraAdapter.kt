@@ -1,4 +1,4 @@
-package Seguridad
+package com.example.resionemobile.seguridad
 
 import android.view.LayoutInflater
 import android.view.View

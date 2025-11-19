@@ -1,4 +1,4 @@
-package Finanzas
+package com.example.resionemobile.finanzas
 
 import android.os.Bundle
 import android.widget.Toast
@@ -28,7 +28,7 @@ class HistorialPagos : AppCompatActivity() {
     private fun setupRecyclerView() {
         adapter = HistorialPagosAdapter(emptyList()) { pago ->
             // TODO: Lógica para ver/descargar factura
-            Toast.makeText(this, "Visualizando factura para el pago ${pago._id}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Visualizando factura para el pago ${pago.id}", Toast.LENGTH_SHORT).show()
         }
         binding.rvHistorialPagos.adapter = adapter
         binding.rvHistorialPagos.layoutManager = LinearLayoutManager(this)
