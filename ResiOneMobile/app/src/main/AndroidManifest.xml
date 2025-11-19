@@ -17,6 +17,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ResiOneMobile">
         <activity
+            android:name="Registro.PerfilView"
+            android:exported="true"
+            android:label="Perfil"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
             android:name="Comunicados.ComunicadosFeed"
             android:exported="true"
             android:label="Comunicados"

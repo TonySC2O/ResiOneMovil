@@ -18,6 +18,8 @@ import com.example.resionemobile.api.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import android.content.Context
+import com.google.gson.Gson
 
 class MainActivity : BaseActivity() {
 
@@ -66,6 +68,14 @@ class MainActivity : BaseActivity() {
                 if (response.isSuccessful) {
                     val body = response.body()
                     if (body?.usuario != null) {
+                        // Guardar usuario en SharedPreferences como JSON bajo la clave "current_user"
+                        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+                        val gson = Gson()
+                        prefs.edit().putString("current_user", gson.toJson(body.usuario)).apply()
+
+                        // SI TIENES TOKEN en la respuesta: guardarlo también (ejemplo)
+                        // body.token?.let { prefs.edit().putString("auth_token", it).apply() }
+
                         Toast.makeText(this@MainActivity, "Bienvenido ${body.usuario.nombre}", Toast.LENGTH_SHORT).show()
                         // Navegar a ComunicadosFeed después del login exitoso
                         val intent = Intent(this@MainActivity, ComunicadosFeed::class.java)
@@ -75,6 +85,7 @@ class MainActivity : BaseActivity() {
                         Toast.makeText(this@MainActivity, body?.mensaje ?: "Error desconocido", Toast.LENGTH_SHORT).show()
                     }
                 } else {
+                    // response.errorBody()?.string() puede consumir el stream; lo dejamos como antes
                     Toast.makeText(this@MainActivity, "Error ${response.code()}: ${response.errorBody()?.string()}", Toast.LENGTH_SHORT).show()
                 }
             }
