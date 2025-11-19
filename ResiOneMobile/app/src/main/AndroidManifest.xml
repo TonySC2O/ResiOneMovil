@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Permisos para conectarse al backend -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:allowBackup="true"
         android:usesCleartextTraffic="true"
-        android:networkSecurityConfig="@xml/network_security_config"
+        android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -16,31 +16,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ResiOneMobile">
-        <activity
-            android:name="Comunicados.ComunicadosFeed"
-            android:exported="true"
-            android:label="Comunicados"
-            android:theme="@style/Theme.ResiOneMobile" />
-        <activity
-            android:name=".finanzas.RegistroCuota"
-            android:exported="true"
-            android:label="Registrar Cuota"
-            android:theme="@style/Theme.ResiOneMobile" />
-        <activity
-            android:name=".finanzas.RegistroPago"
-            android:exported="true"
-            android:label="Registrar Pago"
-            android:theme="@style/Theme.ResiOneMobile" />
-        <activity
-            android:name=".finanzas.HistorialPagos"
-            android:exported="true"
-            android:label="Historial de Pagos"
-            android:theme="@style/Theme.ResiOneMobile" />
-        <activity
-            android:name="Registro.CrearRegistro"
-            android:exported="true"
-            android:label="Crear Registro"
-            android:theme="@style/Theme.ResiOneMobile" />
         <activity
             android:name="Reservas.ReservarEspacio"
             android:exported="true"
@@ -62,36 +37,6 @@
             android:label="@string/title_activity_crear_reporte"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
-            android:name=".seguridad.SeguridadMain"
-            android:exported="true"
-            android:label="Seguridad"
-            android:theme="@style/Theme.ResiOneMobile" />
-        <activity
-            android:name=".seguridad.RegistroEntrada"
-            android:exported="true"
-            android:label="Registrar Entrada"
-            android:theme="@style/Theme.ResiOneMobile" />
-        <activity
-            android:name=".seguridad.RegistroSalida"
-            android:exported="true"
-            android:label="Registrar Salida"
-            android:theme="@style/Theme.ResiOneMobile" />
-        <activity
-            android:name=".seguridad.Bitacora"
-            android:exported="true"
-            android:label="Bitácora de Acceso"
-            android:theme="@style/Theme.ResiOneMobile" />
-        <activity
-            android:name=".mantenimiento.RegistrarMantenimiento"
-            android:exported="true"
-            android:label="Registrar Mantenimiento"
-            android:theme="@style/Theme.ResiOneMobile" />
-        <activity
-            android:name=".mantenimiento.HistorialMantenimientos"
-            android:exported="true"
-            android:label="Historial de Mantenimientos"
-            android:theme="@style/Theme.ResiOneMobile" />
-        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.ResiOneMobile">
@@ -101,12 +46,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name="com.example.resionemobile.chatbot.ChatBotActivity"
-            android:exported="false"
-            android:label="ResiBot - Asistente"
-            android:parentActivityName=".MainActivity" />
     </application>
 
 </manifest>
