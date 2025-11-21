@@ -20,7 +20,7 @@
     <item
         android:id="@+id/action_admin_reservas"
         android:orderInCategory="4"
-        android:title="Administrar Reservas"
+        android:title="Gestionar Reservas"
         android:visible="false"
         app:showAsAction="never" />
     <item
@@ -37,11 +37,13 @@
         android:id="@+id/action_seguridad"
         android:orderInCategory="7"
         android:title="Seguridad"
+        android:visible="false"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_mantenimiento"
         android:orderInCategory="8"
         android:title="Mantenimiento"
+        android:visible="false"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_finanzas"

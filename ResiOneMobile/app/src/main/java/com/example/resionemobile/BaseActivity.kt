@@ -58,27 +58,29 @@ abstract class BaseActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_main, menu)
 
-        // Ocultar opciones de admin por defecto
+        // Ocultar opciones restringidas por defecto
         menu.findItem(R.id.action_admin_reservas)?.isVisible = false
-        //menu.findItem(R.id.action_registrar_mantenimiento)?.isVisible = false
-        //menu.findItem(R.id.action_registro_entrada)?.isVisible = false
-        //menu.findItem(R.id.action_registro_salida)?.isVisible = false
+        menu.findItem(R.id.action_mantenimiento)?.isVisible = false
+        menu.findItem(R.id.action_seguridad)?.isVisible = false
 
-        when (rolUsuario) {
-            "ADMIN" -> {
-                menu.findItem(R.id.action_admin_reservas)?.isVisible = true
-                //menu.findItem(R.id.action_registrar_mantenimiento)?.isVisible = true
-                //menu.findItem(R.id.action_registro_entrada)?.isVisible = true
-                //menu.findItem(R.id.action_registro_salida)?.isVisible = true
-            }
-            "TECNICO_MANTENIMIENTO", "TÉCNICO DE MANTENIMIENTO" -> {
-                //menu.findItem(R.id.action_registrar_mantenimiento)?.isVisible = true
-            }
-            "AUXILIAR_DE_SEGURIDAD", "AUXILIAR DE SEGURIDAD" -> {
-                //menu.findItem(R.id.action_registro_entrada)?.isVisible = true
-               // menu.findItem(R.id.action_registro_salida)?.isVisible = true
-            }
+        // Mostrar opciones según el rol del usuario
+        val esAdmin = esAdministrador || rolUsuario == "ADMIN"
+        
+        // Gestionar Reservas - Solo administradores
+        if (esAdmin) {
+            menu.findItem(R.id.action_admin_reservas)?.isVisible = true
         }
+
+        // Mantenimiento - Administradores y Técnicos de Mantenimiento
+        if (esAdmin || rolUsuario == "TÉCNICO DE MANTENIMIENTO" || rolUsuario == "TECNICO_MANTENIMIENTO") {
+            menu.findItem(R.id.action_mantenimiento)?.isVisible = true
+        }
+
+        // Seguridad - Administradores y Auxiliares de Seguridad
+        if (esAdmin || rolUsuario == "AUXILIAR DE SEGURIDAD" || rolUsuario == "AUXILIAR_DE_SEGURIDAD") {
+            menu.findItem(R.id.action_seguridad)?.isVisible = true
+        }
+
         return true
     }
 

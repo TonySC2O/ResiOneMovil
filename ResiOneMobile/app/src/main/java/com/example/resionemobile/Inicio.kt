@@ -31,12 +31,19 @@ class Inicio : BaseActivity() {
 
         // Cargar datos del usuario actual
         currentUser?.let { usuario ->
-            Log.d("Inicio", "Usuario encontrado: ${usuario.nombre}, ${usuario.apartamento}, ${usuario.rol}")
+            Log.d("Inicio", "Usuario encontrado: ${usuario.nombre}, ${usuario.apartamento}, ${usuario.rol}, esAdmin: ${usuario.esAdministrador}")
             tvBienvenida.text = "¡Bienvenido!"
             tvNombre.text = "Nombre: ${usuario.nombre}"
             tvIdentificacion.text = "Identificación: ${usuario.identificacion ?: "No especificada"}"
             tvResidencia.text = "Residencia: ${usuario.apartamento ?: "No especificada"}"
-            tvRol.text = "Rol: ${usuario.rol ?: "RESIDENTE"}"
+            
+            // Determinar el rol a mostrar
+            val rolMostrar = when {
+                usuario.esAdministrador -> "ADMINISTRADOR"
+                !usuario.rol.isNullOrBlank() -> usuario.rol!!
+                else -> "RESIDENTE"
+            }
+            tvRol.text = "Rol: $rolMostrar"
         } ?: run {
             Log.d("Inicio", "Usuario es null")
             tvBienvenida.text = "Bienvenido"
