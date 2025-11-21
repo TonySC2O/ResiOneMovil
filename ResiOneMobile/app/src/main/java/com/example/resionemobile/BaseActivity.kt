@@ -96,6 +96,8 @@ abstract class BaseActivity : AppCompatActivity() {
             R.id.action_seguridad -> startActivity(Intent(this, SeguridadMain::class.java))
             R.id.action_mantenimiento -> startActivity(Intent(this, MantenimientoMain::class.java))
             R.id.action_finanzas -> startActivity(Intent(this, FinanzasMain::class.java))
+            R.id.action_chatbot -> { startActivity(Intent(this, com.example.resionemobile.chatbot.ChatBotActivity::class.java))
+            }
             R.id.action_salir -> {
                 getSharedPreferences("app_prefs", MODE_PRIVATE).edit().clear().apply()
                 startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))

@@ -111,6 +111,7 @@
             android:exported="true"
             android:label="Mantenimiento"
             android:theme="@style/Theme.ResiOneMobile" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -122,7 +123,7 @@
         </activity>
 
         <activity
-            android:name="com.example.resionemobile.chatbot.ChatBotActivity"
+            android:name=".chatbot.ChatBotActivity"
             android:exported="false"
             android:label="ResiBot - Asistente"
             android:parentActivityName=".MainActivity" />
