@@ -18,10 +18,12 @@ const registrarUsuario = async (req, res) => {
     const nuevoUsuario = new Usuario({
       nombre, correo, telefono, identificacion, contraseña, apartamento, habitantes,
       esAdministrador: !!esAdministrador,
-      codigoEmpleado: esAdministrador ? codigoEmpleado : undefined
+      codigoEmpleado: esAdministrador ? codigoEmpleado : undefined,
+      rol: esAdministrador ? 'ADMIN' : 'RESIDENTE'
     });
 
     await nuevoUsuario.save();
+    console.log(`✓ Usuario registrado: ${correo} - Rol: ${nuevoUsuario.rol}`);
     res.status(201).json({ mensaje: 'Usuario registrado correctamente' });
   } catch (error) {
     console.error('Error en registro:', error);
@@ -41,6 +43,8 @@ const loginUsuario = async (req, res) => {
     if (!usuario) return res.status(404).json({ mensaje: 'Usuario no encontrado' });
     if (usuario.contraseña !== contraseña) return res.status(401).json({ mensaje: 'Contraseña incorrecta' });
 
+    console.log(`✓ Login exitoso: ${correo} - Rol: ${usuario.rol} - Es Admin: ${usuario.esAdministrador}`);
+
     res.json({
       mensaje: 'Inicio de sesión exitoso',
       usuario: {
@@ -51,7 +55,8 @@ const loginUsuario = async (req, res) => {
         apartamento: usuario.apartamento,
         habitantes: usuario.habitantes,
         esAdministrador: usuario.esAdministrador,
-        codigoEmpleado: usuario.codigoEmpleado
+        codigoEmpleado: usuario.codigoEmpleado,
+        rol: usuario.rol
       }
     });
   } catch (error) {
@@ -90,7 +95,8 @@ const editarUsuario = async (req, res) => {
       apartamento: usuarioActualizado.apartamento,
       habitantes: usuarioActualizado.habitantes,
       esAdministrador: usuarioActualizado.esAdministrador,
-      codigoEmpleado: usuarioActualizado.codigoEmpleado
+      codigoEmpleado: usuarioActualizado.codigoEmpleado,
+      rol: usuarioActualizado.rol
     };
 
     return res.json({ mensaje: 'Perfil actualizado correctamente', usuario: usuarioPublico });

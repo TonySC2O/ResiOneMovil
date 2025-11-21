@@ -33,7 +33,7 @@ data class UsuarioData(
     val habitantes: Int?,
     val esAdministrador: Boolean,
     val codigoEmpleado: String?,
-    val rol: String? = null
+    val rol: String
 )
 
 data class LoginResponse(
@@ -289,4 +289,81 @@ data class CambiarEstadoRequest(
     val estado: String,
     val comentariosAdmin: String,
     val identificacionTecnico: String? = null
+)
+
+
+// ===== RESERVAS =====
+
+data class ReservaBackend(
+    @SerializedName("_id") val id: String,
+    val zona: String,
+    val fecha: String,
+    val horaInicio: String,
+    val horaFin: String,
+    val numeroPersonas: Int,
+    val comentarios: String,
+    val estado: String,  // "pendiente" o "aprobada"
+    val residenteCorreo: String,
+    val residenteNombre: String,
+    val residenteApartamento: String,
+    val residenteIdentificacion: String,
+    val administradorQueResponde: String?,
+    val fechaRespuesta: String?,
+    val createdAt: String,
+    val updatedAt: String
+)
+
+data class ReservasListResponse(
+    val reservas: List<ReservaBackend>
+)
+
+data class CrearReservaRequest(
+    val zona: String,
+    val fecha: String,
+    val horaInicio: String,
+    val horaFin: String,
+    val numeroPersonas: Int,
+    val comentarios: String,
+    val residenteCorreo: String,
+    val residenteNombre: String,
+    val residenteApartamento: String,
+    val residenteIdentificacion: String
+)
+
+data class CrearReservaResponse(
+    val mensaje: String,
+    val reserva: ReservaBackend
+)
+
+data class AprobarReservaRequest(
+    val administradorCorreo: String
+)
+
+data class AprobarReservaResponse(
+    val mensaje: String,
+    val reserva: ReservaBackend
+)
+
+data class RechazarReservaRequest(
+    val razonRechazo: String,
+    val administradorCorreo: String
+)
+
+data class RechazarReservaResponse(
+    val mensaje: String,
+    val razonRechazo: String
+)
+
+data class ActualizarReservaRequest(
+    val zona: String,
+    val fecha: String,
+    val horaInicio: String,
+    val horaFin: String,
+    val numeroPersonas: Int,
+    val comentarios: String
+)
+
+data class ActualizarReservaResponse(
+    val mensaje: String,
+    val reserva: ReservaBackend
 )

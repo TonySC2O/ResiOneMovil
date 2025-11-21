@@ -42,10 +42,14 @@ abstract class BaseActivity : AppCompatActivity() {
             try {
                 currentUser = Gson().fromJson(json, UsuarioData::class.java)
                 esAdministrador = currentUser?.esAdministrador == true
-                rolUsuario = (currentUser?.rol ?: "RESIDENTE").uppercase()
-                android.util.Log.d("BaseActivity", "Usuario cargado: $currentUser")
+                rolUsuario = currentUser?.rol?.uppercase() ?: "RESIDENTE"
+                android.util.Log.d("BaseActivity", "✓ Usuario cargado: ${currentUser?.nombre}")
+                android.util.Log.d("BaseActivity", "✓ Correo: ${currentUser?.correo}")
+                android.util.Log.d("BaseActivity", "✓ Rol desde DB: ${currentUser?.rol}")
+                android.util.Log.d("BaseActivity", "✓ Rol procesado: $rolUsuario")
+                android.util.Log.d("BaseActivity", "✓ Es administrador: $esAdministrador")
             } catch (e: Exception) {
-                android.util.Log.e("BaseActivity", "Error al cargar usuario", e)
+                android.util.Log.e("BaseActivity", "❌ Error al cargar usuario", e)
                 currentUser = null
                 esAdministrador = false
                 rolUsuario = "RESIDENTE"
@@ -96,6 +100,7 @@ abstract class BaseActivity : AppCompatActivity() {
             R.id.action_seguridad -> startActivity(Intent(this, SeguridadMain::class.java))
             R.id.action_mantenimiento -> startActivity(Intent(this, MantenimientoMain::class.java))
             R.id.action_finanzas -> startActivity(Intent(this, FinanzasMain::class.java))
+            R.id.action_chatbot -> startActivity(Intent(this, ChatBotActivity::class.java))
             R.id.action_salir -> {
                 getSharedPreferences("app_prefs", MODE_PRIVATE).edit().clear().apply()
                 startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))

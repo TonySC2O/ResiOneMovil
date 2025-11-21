@@ -56,8 +56,13 @@
         android:title="Finanzas"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_salir"
+        android:id="@+id/action_chatbot"
         android:orderInCategory="11"
+        android:title="ChatBot"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_salir"
+        android:orderInCategory="12"
         android:title="Salir"
         app:showAsAction="never" />
 </menu>
