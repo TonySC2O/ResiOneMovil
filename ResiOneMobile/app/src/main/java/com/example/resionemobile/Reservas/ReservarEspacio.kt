@@ -1,4 +1,4 @@
-package Reservas
+package com.example.resionemobile.Reservas
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog

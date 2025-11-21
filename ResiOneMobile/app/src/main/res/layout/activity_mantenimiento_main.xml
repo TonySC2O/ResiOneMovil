@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".seguridad.SeguridadMain">
+    tools:context=".mantenimiento.MantenimientoMain">
 
     <LinearLayout
         android:id="@+id/toolbar_container"
@@ -29,7 +29,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/teal_700"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:title="Seguridad"
+            app:title="Mantenimiento"
             app:titleTextColor="@android:color/white" />
     </LinearLayout>
 
@@ -43,30 +43,23 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Módulo de Seguridad"
+            android:text="Módulo de Mantenimiento"
             android:textSize="24sp"
             android:textStyle="bold"
             android:layout_marginBottom="32dp"/>
 
     <Button
-        android:id="@+id/btnRegistrarEntrada"
+        android:id="@+id/btnRegistrarMantenimiento"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Registrar Entrada de Visitante"
+        android:text="Registrar Mantenimiento"
         android:layout_marginBottom="16dp"/>
 
     <Button
-        android:id="@+id/btnRegistrarSalida"
+        android:id="@+id/btnHistorialMantenimientos"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Registrar Salida de Visitante"
-        android:layout_marginBottom="16dp"/>
-
-    <Button
-        android:id="@+id/btnVerBitacora"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Ver Bitácora de Accesos"/>
+        android:text="Historial de Mantenimientos"/>
 
     </LinearLayout>
 

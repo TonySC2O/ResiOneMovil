@@ -1,4 +1,4 @@
-package Registro
+package com.example.resionemobile.Registro
 
 import android.os.Bundle
 import android.view.View

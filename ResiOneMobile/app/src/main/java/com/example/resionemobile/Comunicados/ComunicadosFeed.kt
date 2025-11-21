@@ -1,4 +1,4 @@
-package Comunicados
+package com.example.resionemobile.Comunicados
 
 import android.os.Bundle
 import android.util.Log

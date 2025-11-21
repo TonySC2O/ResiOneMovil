@@ -17,12 +17,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ResiOneMobile">
         <activity
-            android:name="Registro.PerfilView"
+            android:name=".Inicio"
+            android:exported="true"
+            android:label="Inicio"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name=".Registro.PerfilView"
             android:exported="true"
             android:label="Perfil"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
-            android:name="Comunicados.ComunicadosFeed"
+            android:name=".Comunicados.ComunicadosFeed"
             android:exported="true"
             android:label="Comunicados"
             android:theme="@style/Theme.ResiOneMobile" />
@@ -42,27 +47,32 @@
             android:label="Historial de Pagos"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
-            android:name="Registro.CrearRegistro"
+            android:name=".finanzas.FinanzasMain"
+            android:exported="true"
+            android:label="Finanzas"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name=".Registro.CrearRegistro"
             android:exported="true"
             android:label="Crear Registro"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
-            android:name="Reservas.ReservarEspacio"
+            android:name=".Reservas.ReservarEspacio"
             android:exported="true"
             android:label="@string/title_activity_reservar_espacio"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
-            android:name="Reservas.AdminReservas"
+            android:name=".Reservas.AdminReservas"
             android:exported="true"
             android:label="Administrar Reservas"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
-            android:name="Reportes.Reportes"
+            android:name=".Reportes.Reportes"
             android:exported="true"
             android:label="Reportes"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
-            android:name="Reportes.CrearReporte"
+            android:name=".Reportes.CrearReporte"
             android:exported="true"
             android:label="@string/title_activity_crear_reporte"
             android:theme="@style/Theme.ResiOneMobile" />
@@ -95,6 +105,11 @@
             android:name=".mantenimiento.HistorialMantenimientos"
             android:exported="true"
             android:label="Historial de Mantenimientos"
+            android:theme="@style/Theme.ResiOneMobile" />
+        <activity
+            android:name=".mantenimiento.MantenimientoMain"
+            android:exported="true"
+            android:label="Mantenimiento"
             android:theme="@style/Theme.ResiOneMobile" />
         <activity
             android:name=".MainActivity"

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".seguridad.SeguridadMain">
+    tools:context=".finanzas.FinanzasMain">
 
     <LinearLayout
         android:id="@+id/toolbar_container"
@@ -29,7 +29,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/teal_700"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:title="Seguridad"
+            app:title="Finanzas"
             app:titleTextColor="@android:color/white" />
     </LinearLayout>
 
@@ -43,30 +43,30 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Módulo de Seguridad"
+            android:text="Módulo de Finanzas"
             android:textSize="24sp"
             android:textStyle="bold"
             android:layout_marginBottom="32dp"/>
 
     <Button
-        android:id="@+id/btnRegistrarEntrada"
+        android:id="@+id/btnRegistrarCuota"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Registrar Entrada de Visitante"
+        android:text="Registrar Cuota"
         android:layout_marginBottom="16dp"/>
 
     <Button
-        android:id="@+id/btnRegistrarSalida"
+        android:id="@+id/btnRegistrarPago"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Registrar Salida de Visitante"
+        android:text="Registrar Pago"
         android:layout_marginBottom="16dp"/>
 
     <Button
-        android:id="@+id/btnVerBitacora"
+        android:id="@+id/btnHistorialPagos"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Ver Bitácora de Accesos"/>
+        android:text="Historial de Pagos"/>
 
     </LinearLayout>
 

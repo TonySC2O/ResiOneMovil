@@ -1,4 +1,4 @@
-package Comunicados
+package com.example.resionemobile.Comunicados
 
 import android.view.LayoutInflater
 import android.view.View

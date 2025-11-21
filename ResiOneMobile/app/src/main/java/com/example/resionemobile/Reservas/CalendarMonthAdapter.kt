@@ -1,4 +1,4 @@
-package Reservas
+package com.example.resionemobile.Reservas
 
 import android.view.LayoutInflater
 import android.view.View

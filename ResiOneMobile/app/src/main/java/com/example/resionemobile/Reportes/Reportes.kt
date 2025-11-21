@@ -1,4 +1,4 @@
-package Reportes
+package com.example.resionemobile.Reportes
 
 import android.content.Intent
 import android.graphics.Bitmap

@@ -3,49 +3,54 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.resionemobile.MainActivity">
     <item
-        android:id="@+id/action_reservas"
+        android:id="@+id/action_inicio"
         android:orderInCategory="1"
+        android:title="Inicio"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_comunicados"
+        android:orderInCategory="2"
+        android:title="Comunicados"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_reservas"
+        android:orderInCategory="3"
         android:title="Reservas de Espacios"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_admin_reservas"
-        android:orderInCategory="2"
+        android:orderInCategory="4"
         android:title="Administrar Reservas"
         android:visible="false"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_ver_reportes"
-        android:orderInCategory="3"
+        android:orderInCategory="5"
         android:title="Ver Reportes"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_reportes"
-        android:orderInCategory="4"
+        android:orderInCategory="6"
         android:title="Crear Reportes"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_inicio"
-        android:orderInCategory="5"
-        android:title="Inicio"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/action_visient"
-        android:orderInCategory="6"
-        android:title="Visitas"
+        android:id="@+id/action_seguridad"
+        android:orderInCategory="7"
+        android:title="Seguridad"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_mantenimiento"
-        android:orderInCategory="7"
-        android:title="Registrar Mantenimiento"
+        android:orderInCategory="8"
+        android:title="Mantenimiento"
         app:showAsAction="never" />
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="8"
-        android:title="@string/action_settings"
+        android:id="@+id/action_finanzas"
+        android:orderInCategory="9"
+        android:title="Finanzas"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_salir"
-        android:orderInCategory="9"
+        android:orderInCategory="10"
         android:title="Salir"
         app:showAsAction="never" />
 </menu>

@@ -11,15 +11,16 @@ import com.example.resionemobile.chatbot.ChatBotActivity
 import com.example.resionemobile.seguridad.RegistroEntrada
 import com.example.resionemobile.seguridad.RegistroSalida
 import com.google.gson.Gson
-
-// IMPORTS CORREGIDOS SEGÚN TUS CARPETAS REALES
-import Reservas.AdminReservas
-import Reservas.ReservarEspacio
-import Reportes.CrearReporte
-import Reportes.Reportes
-import Registro.PerfilView                  // ← funciona si PerfilView.kt tiene package Registro
+import com.example.resionemobile.Reservas.AdminReservas
+import com.example.resionemobile.Reservas.ReservarEspacio
+import com.example.resionemobile.Reportes.CrearReporte
+import com.example.resionemobile.Reportes.Reportes
+import com.example.resionemobile.Registro.PerfilView
 import com.example.resionemobile.mantenimiento.RegistrarMantenimiento
-import Comunicados.ComunicadosFeed           // ← para el botón "Inicio"
+import com.example.resionemobile.mantenimiento.MantenimientoMain
+import com.example.resionemobile.finanzas.FinanzasMain
+import com.example.resionemobile.seguridad.SeguridadMain
+import com.example.resionemobile.Comunicados.ComunicadosFeed
 
 abstract class BaseActivity : AppCompatActivity() {
 
@@ -36,16 +37,21 @@ abstract class BaseActivity : AppCompatActivity() {
     private fun cargarUsuario() {
         val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         val json = prefs.getString("current_user", null)
+        android.util.Log.d("BaseActivity", "JSON guardado: $json")
         if (json != null) {
             try {
                 currentUser = Gson().fromJson(json, UsuarioData::class.java)
                 esAdministrador = currentUser?.esAdministrador == true
                 rolUsuario = (currentUser?.rol ?: "RESIDENTE").uppercase()
+                android.util.Log.d("BaseActivity", "Usuario cargado: $currentUser")
             } catch (e: Exception) {
+                android.util.Log.e("BaseActivity", "Error al cargar usuario", e)
                 currentUser = null
                 esAdministrador = false
                 rolUsuario = "RESIDENTE"
             }
+        } else {
+            android.util.Log.d("BaseActivity", "No hay usuario guardado")
         }
     }
 
@@ -82,12 +88,11 @@ abstract class BaseActivity : AppCompatActivity() {
             R.id.action_admin_reservas -> startActivity(Intent(this, AdminReservas::class.java))
             R.id.action_reportes -> startActivity(Intent(this, CrearReporte::class.java))
             R.id.action_ver_reportes -> startActivity(Intent(this, Reportes::class.java))
-            R.id.action_inicio -> startActivity(Intent(this, MainActivity::class.java))
-            //R.id.action_perfil -> startActivity(Intent(this, PerfilView::class.java))
-            //R.id.action_registro_entrada -> startActivity(Intent(this, RegistroEntrada::class.java))
-           // R.id.action_registro_salida -> startActivity(Intent(this, RegistroSalida::class.java))
-            //R.id.action_registrar_mantenimiento -> startActivity(Intent(this, RegistrarMantenimiento::class.java))
-           // R.id.action_chatbot -> startActivity(Intent(this, ChatBotActivity::class.java))
+            R.id.action_inicio -> startActivity(Intent(this, Inicio::class.java))
+            R.id.action_comunicados -> startActivity(Intent(this, ComunicadosFeed::class.java))
+            R.id.action_seguridad -> startActivity(Intent(this, SeguridadMain::class.java))
+            R.id.action_mantenimiento -> startActivity(Intent(this, MantenimientoMain::class.java))
+            R.id.action_finanzas -> startActivity(Intent(this, FinanzasMain::class.java))
             R.id.action_salir -> {
                 getSharedPreferences("app_prefs", MODE_PRIVATE).edit().clear().apply()
                 startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))

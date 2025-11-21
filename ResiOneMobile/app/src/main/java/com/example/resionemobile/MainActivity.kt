@@ -14,8 +14,8 @@ import com.example.resionemobile.api.LoginRequest
 import com.example.resionemobile.api.LoginResponse
 import com.example.resionemobile.api.RetrofitClient
 import com.google.gson.Gson
-import Comunicados.ComunicadosFeed
-import Registro.CrearRegistro   // ← Aquí está tu clase de registro
+import com.example.resionemobile.Comunicados.ComunicadosFeed
+import com.example.resionemobile.Registro.CrearRegistro
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -27,9 +27,9 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-        // Si ya hay sesión, saltar directo al feed
+        // Si ya hay sesión, saltar directo a inicio
         if (hayUsuarioLogueado()) {
-            startActivity(Intent(this, ComunicadosFeed::class.java))
+            startActivity(Intent(this, Inicio::class.java))
             finish()
             return
         }
@@ -82,8 +82,8 @@ class MainActivity : AppCompatActivity() {
 
                     Toast.makeText(this@MainActivity, "Bienvenido ${usuario.nombre}", Toast.LENGTH_LONG).show()
 
-                    // Ir al feed de comunicados
-                    startActivity(Intent(this@MainActivity, ComunicadosFeed::class.java))
+                    // Ir a la pantalla de inicio
+                    startActivity(Intent(this@MainActivity, Inicio::class.java))
                     finish()
                 } else {
                     Toast.makeText(this@MainActivity, "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show()
