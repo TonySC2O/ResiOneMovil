@@ -35,9 +35,11 @@ class PerfilView : BaseActivity() {
         binding.btnBack.setOnClickListener { finish() }
         binding.btnEdit.setOnClickListener { enterEditMode() }
         binding.btnSave.setOnClickListener { saveChanges() }
+    }
 
-        // Cargar user desde SharedPreferences
-        currentUser = loadUserFromPrefs()
+    override fun onResume() {
+        super.onResume()
+        // Cargar datos del usuario actual desde BaseActivity
         if (currentUser == null) {
             Toast.makeText(this, "No hay usuario logueado", Toast.LENGTH_SHORT).show()
             finish()
@@ -45,7 +47,17 @@ class PerfilView : BaseActivity() {
         }
 
         populateFields(currentUser!!)
+        configurarVisibilidadCampos()
         setEditable(false)
+    }
+
+    private fun configurarVisibilidadCampos() {
+        // Ocultar código de empleado para residentes
+        val rolUpper = currentUser?.rol?.uppercase() ?: "RESIDENTE"
+        val esResidente = rolUpper == "RESIDENTE" || 
+                         (rolUpper.isBlank() && !currentUser!!.esAdministrador)
+        
+        binding.etCodigoEmpleado.visibility = if (esResidente) View.GONE else View.VISIBLE
     }
 
     private fun populateFields(u: UsuarioData) {
@@ -158,14 +170,6 @@ class PerfilView : BaseActivity() {
                 showToast("Error de red: ${t.localizedMessage ?: "desconocido"}")
             }
         })
-    }
-
-    private fun loadUserFromPrefs(): UsuarioData? {
-        val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val json = prefs.getString("current_user", null)
-        return if (!json.isNullOrEmpty()) {
-            try { gson.fromJson(json, UsuarioData::class.java) } catch (e: Exception) { null }
-        } else null
     }
 
     private fun saveUserToPrefs(user: UsuarioData) {

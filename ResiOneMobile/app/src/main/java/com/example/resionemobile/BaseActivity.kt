@@ -91,6 +91,7 @@ abstract class BaseActivity : AppCompatActivity() {
             R.id.action_reportes -> startActivity(Intent(this, CrearReporte::class.java))
             R.id.action_ver_reportes -> startActivity(Intent(this, Reportes::class.java))
             R.id.action_inicio -> startActivity(Intent(this, Inicio::class.java))
+            R.id.action_perfil -> startActivity(Intent(this, PerfilView::class.java))
             R.id.action_comunicados -> startActivity(Intent(this, ComunicadosFeed::class.java))
             R.id.action_seguridad -> startActivity(Intent(this, SeguridadMain::class.java))
             R.id.action_mantenimiento -> startActivity(Intent(this, MantenimientoMain::class.java))
