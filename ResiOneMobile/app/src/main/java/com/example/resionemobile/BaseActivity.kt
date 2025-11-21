@@ -72,12 +72,12 @@ abstract class BaseActivity : AppCompatActivity() {
         }
 
         // Mantenimiento - Administradores y Técnicos de Mantenimiento
-        if (esAdmin || rolUsuario == "TÉCNICO DE MANTENIMIENTO" || rolUsuario == "TECNICO_MANTENIMIENTO") {
+        if (esAdmin || rolUsuario == "TECNICO_MANTENIMIENTO") {
             menu.findItem(R.id.action_mantenimiento)?.isVisible = true
         }
 
         // Seguridad - Administradores y Auxiliares de Seguridad
-        if (esAdmin || rolUsuario == "AUXILIAR DE SEGURIDAD" || rolUsuario == "AUXILIAR_DE_SEGURIDAD") {
+        if (esAdmin || rolUsuario == "AUXILIAR_SEGURIDAD") {
             menu.findItem(R.id.action_seguridad)?.isVisible = true
         }
 

@@ -25,6 +25,9 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Servir archivos estáticos (imágenes, videos, documentos)
+app.use('/uploads', express.static('uploads'));
+
 // Rutas
 app.use('/api', usuarioRoutes);
 app.use('/api/comunicados', comunicadosRoutes);

@@ -82,4 +82,32 @@ interface ApiService {
 
     @GET("mantenimiento/historial")
     fun obtenerHistorialMante(): Call<HistorialManteResponse>
+
+    // ===== REPORTES =====
+    
+    @POST("reportes/")
+    fun crearReporte(@Body body: CrearReporteRequest): Call<CrearReporteResponse>
+
+    @Multipart
+    @POST("reportes/")
+    fun crearReporteConArchivos(
+        @Part("tipo") tipo: RequestBody,
+        @Part("descripcion") descripcion: RequestBody,
+        @Part("nivelPrioridad") nivelPrioridad: RequestBody,
+        @Part("fecha") fecha: RequestBody,
+        @Part("residenteCorreo") residenteCorreo: RequestBody,
+        @Part("residenteNombre") residenteNombre: RequestBody,
+        @Part("residenteApartamento") residenteApartamento: RequestBody,
+        @Part("residenteIdentificacion") residenteIdentificacion: RequestBody,
+        @Part archivos: List<MultipartBody.Part>
+    ): Call<CrearReporteResponse>
+
+    @GET("reportes/")
+    fun obtenerReportes(): Call<ReportesListResponse>
+
+    @PUT("reportes/{id}")
+    fun cambiarEstadoReporte(
+        @Path("id") id: String,
+        @Body body: CambiarEstadoRequest
+    ): Call<GenericResponse>
 }

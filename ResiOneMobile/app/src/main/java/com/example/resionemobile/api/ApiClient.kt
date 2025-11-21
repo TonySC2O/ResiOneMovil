@@ -5,8 +5,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
 
-    private const val BASE_URL = "http://192.168.1.10:5050/api/"
-    // CAMBIA la IP
+    private const val BASE_URL = "http://10.0.2.2:5050/api/"
+    // IP especial para que el emulador Android acceda a localhost de la máquina host
 
     val instance: Retrofit by lazy {
         Retrofit.Builder()
