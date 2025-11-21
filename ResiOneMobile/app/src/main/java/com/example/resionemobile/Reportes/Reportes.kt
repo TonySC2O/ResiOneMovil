@@ -15,8 +15,14 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import coil.load
 import com.example.resionemobile.BaseActivity
 import com.example.resionemobile.R
+import com.example.resionemobile.api.RetrofitClient
+import com.example.resionemobile.api.ReporteBackend
+import com.example.resionemobile.api.CambiarEstadoRequest
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -42,6 +48,7 @@ class Reportes : BaseActivity() {
 
     private lateinit var reportesContainer: LinearLayout
     private val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+    private var reportesFromApi = listOf<ReporteBackend>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,17 +60,62 @@ class Reportes : BaseActivity() {
 
         // Obtener contenedor de reportes
         reportesContainer = findViewById(R.id.reportes_container)
-
-        // Cargar reportes desde ReportesManager
-        loadReportes()
-        
-
     }
     
     override fun onResume() {
         super.onResume()
-        // Recargar reportes cada vez que se vuelve a la pantalla
-        loadReportes()
+        // Cargar reportes desde la API cada vez que se vuelve a la pantalla
+        cargarReportesDesdeApi()
+    }
+
+    /**
+     * Carga los reportes desde la API de MongoDB.
+     * Los administradores ven todos los reportes.
+     * Los residentes solo ven sus propios reportes.
+     */
+    private fun cargarReportesDesdeApi() {
+        RetrofitClient.api.obtenerReportes().enqueue(
+            object : retrofit2.Callback<com.example.resionemobile.api.ReportesListResponse> {
+                override fun onResponse(
+                    call: retrofit2.Call<com.example.resionemobile.api.ReportesListResponse>,
+                    response: retrofit2.Response<com.example.resionemobile.api.ReportesListResponse>
+                ) {
+                    if (response.isSuccessful) {
+                        val todosLosReportes = response.body()?.reportes ?: emptyList()
+                        
+                        // Todos los usuarios ven todos los reportes
+                        reportesFromApi = todosLosReportes
+                        
+                        loadReportes()
+                    } else {
+                        val errorBody = response.errorBody()?.string()
+                        Toast.makeText(
+                            this@Reportes,
+                            "Error al cargar reportes: ${response.code()}\n${errorBody ?: response.message()}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        // Mostrar interfaz vacía
+                        reportesFromApi = emptyList()
+                        loadReportes()
+                    }
+                }
+
+                override fun onFailure(
+                    call: retrofit2.Call<com.example.resionemobile.api.ReportesListResponse>,
+                    t: Throwable
+                ) {
+                    Toast.makeText(
+                        this@Reportes,
+                        "Error de conexión: ${t.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    t.printStackTrace()
+                    // Mostrar interfaz vacía
+                    reportesFromApi = emptyList()
+                    loadReportes()
+                }
+            }
+        )
     }
 
     /**
@@ -73,9 +125,7 @@ class Reportes : BaseActivity() {
     private fun loadReportes() {
         reportesContainer.removeAllViews()
         
-        val reportes = ReportesManager.obtenerReportes()
-        
-        if (reportes.isEmpty()) {
+        if (reportesFromApi.isEmpty()) {
             // Mostrar mensaje si no hay reportes
             val emptyView = TextView(this).apply {
                 text = "No hay reportes creados.\n\nCrea un reporte desde el menú 'Crear Reportes'"
@@ -88,7 +138,7 @@ class Reportes : BaseActivity() {
             return
         }
 
-        reportes.forEachIndexed { index, reporte ->
+        reportesFromApi.forEachIndexed { index, reporte ->
             val itemView = LayoutInflater.from(this).inflate(R.layout.item_reporte, reportesContainer, false)
 
             // Configurar vistas del item
@@ -100,45 +150,33 @@ class Reportes : BaseActivity() {
             val expandedContent = itemView.findViewById<LinearLayout>(R.id.expanded_content)
 
             // Configurar datos - usar número de seguimiento como título
-            tvTitulo.text = "* Reporte ${reporte.numeroSeguimiento}"
-            tvDescripcion.text = "${reporte.tipo} - Prioridad: ${reporte.prioridad}"
+            tvTitulo.text = "* Reporte ${reporte.seguimiento}"
+            tvDescripcion.text = "${reporte.tipo} - Prioridad: ${reporte.nivelPrioridad}"
 
             // Configurar color de estado
             val colorResId = when (reporte.estado) {
-                ReporteEstado.PENDIENTE -> R.drawable.circle_red
-                ReporteEstado.ANALISIS -> R.drawable.circle_blue
-                ReporteEstado.RESUELTO -> R.drawable.circle_green
+                "Pendiente" -> R.drawable.circle_red
+                "En análisis" -> R.drawable.circle_blue
+                "Resuelto" -> R.drawable.circle_green
+                else -> R.drawable.circle_red
             }
             statusIndicator.setBackgroundResource(colorResId)
 
-            // Mostrar/ocultar thumbnail si tiene archivos multimedia
-            if (reporte.archivosMultimedia.isNotEmpty()) {
+            // Mostrar thumbnail si tiene archivos
+            if (reporte.archivos.isNotEmpty()) {
                 imgThumbnail.visibility = View.VISIBLE
+                val primerArchivo = reporte.archivos.first()
+                val urlCompleta = "http://10.0.2.2:5050/$primerArchivo"
                 
-                // Cargar primera imagen/video como thumbnail
-                val primerArchivo = reporte.archivosMultimedia.first()
-                try {
-                    val mimeType = contentResolver.getType(primerArchivo)
-                    if (mimeType?.startsWith("image/") == true) {
-                        imgThumbnail.setImageURI(primerArchivo)
-                    } else if (mimeType?.startsWith("video/") == true) {
-                        // Extraer frame del video
-                        val mmr = MediaMetadataRetriever()
-                        mmr.setDataSource(this, primerArchivo)
-                        val bitmap: Bitmap? = mmr.frameAtTime
-                        if (bitmap != null) {
-                            imgThumbnail.setImageBitmap(bitmap)
-                        } else {
-                            imgThumbnail.setImageResource(android.R.drawable.ic_media_play)
-                        }
-                        mmr.release()
-                    }
-                } catch (e: Exception) {
-                    imgThumbnail.setImageResource(android.R.drawable.ic_menu_gallery)
+                // Cargar imagen desde servidor usando Coil
+                imgThumbnail.load(urlCompleta) {
+                    crossfade(true)
+                    placeholder(android.R.drawable.ic_menu_gallery)
+                    error(android.R.drawable.ic_menu_report_image)
                 }
                 
                 imgThumbnail.setOnClickListener {
-                    mostrarGaleriaMultimedia(reporte)
+                    mostrarArchivosDialog(reporte)
                 }
             } else {
                 imgThumbnail.visibility = View.GONE
@@ -168,47 +206,35 @@ class Reportes : BaseActivity() {
 
     /**
      * Muestra un diálogo con los detalles completos del reporte.
-     * Incluye tipo, estado, descripción, técnico asignado, creador, fecha y opciones para ver multimedia.
+     * Incluye tipo, estado, descripción, fecha y comentarios del admin.
      * 
      * Sistema de permisos:
-     * - Solo UsuarioAdmin puede asignar técnico (cambia estado a ANALISIS)
-     * - Solo UsuarioAdmin puede cambiar estado de ANALISIS a RESUELTO
+     * - Solo UsuarioAdmin puede cambiar el estado del reporte
      * 
      * @param reporte El reporte a mostrar en detalle
      * @param index Índice del reporte en la lista
      */
-    private fun showReporteDetail(reporte: ReporteData, index: Int) {
-        val estadoText = when (reporte.estado) {
-            ReporteEstado.PENDIENTE -> "Pendiente"
-            ReporteEstado.ANALISIS -> "En análisis"
-            ReporteEstado.RESUELTO -> "Resuelto"
-        }
-        
-        val tecnicoText = reporte.tecnicoAsignado ?: "Ninguno"
-        val fechaCreacionText = dateFormat.format(Date(reporte.fechaCreacion))
-        val fechaIncidenteText = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(reporte.fecha)
-        val fechaAsignacionText = if (reporte.fechaAsignacionTecnico != null) {
-            dateFormat.format(Date(reporte.fechaAsignacionTecnico))
-        } else {
-            "No asignado"
-        }
-
+    private fun showReporteDetail(reporte: ReporteBackend, index: Int) {
         val message = StringBuilder()
-        message.append("Número de seguimiento:\n${reporte.numeroSeguimiento}\n\n")
-        message.append("Reportado por: ${reporte.creador}\n\n")
-        message.append("Tipo de incidencia:\n${reporte.tipo}\n\n")
-        message.append("Prioridad: ${reporte.prioridad}\n\n")
-        message.append("Estado: $estadoText\n\n")
-        message.append("Técnico asignado: $tecnicoText\n\n")
-        if (reporte.tecnicoAsignado != null) {
-            message.append("Fecha de asignación:\n$fechaAsignacionText\n\n")
+        message.append("Número de seguimiento:\n${reporte.seguimiento}\n\n")
+        message.append("Reportado por:\n${reporte.residenteNombre}\n")
+        if (!reporte.residenteApartamento.isNullOrEmpty()) {
+            message.append("Apartamento: ${reporte.residenteApartamento}\n")
         }
-        message.append("Fecha del incidente:\n$fechaIncidenteText\n\n")
-        message.append("Fecha de creación del reporte:\n$fechaCreacionText\n\n")
+        message.append("\n")
+        message.append("Tipo de incidencia:\n${reporte.tipo}\n\n")
+        message.append("Prioridad: ${reporte.nivelPrioridad}\n\n")
+        message.append("Estado: ${reporte.estado}\n\n")
+        message.append("Técnico asignado: ${reporte.tecnicoAsignado}\n\n")
+        message.append("Fecha del incidente:\n${reporte.fecha}\n\n")
         message.append("Descripción:\n${reporte.descripcion}\n\n")
         
-        if (reporte.archivosMultimedia.isNotEmpty()) {
-            message.append("Archivos adjuntos: ${reporte.archivosMultimedia.size}")
+        if (reporte.comentariosAdmin.isNotEmpty()) {
+            message.append("Comentarios del administrador:\n${reporte.comentariosAdmin}\n\n")
+        }
+        
+        if (reporte.archivos.isNotEmpty()) {
+            message.append("Archivos adjuntos: ${reporte.archivos.size}")
         } else {
             message.append("Sin archivos adjuntos")
         }
@@ -216,47 +242,23 @@ class Reportes : BaseActivity() {
         val builder = AlertDialog.Builder(this)
             .setTitle("Reporte ${index + 1}")
             .setMessage(message.toString())
-
-        // Opciones de archivos multimedia
-        if (reporte.archivosMultimedia.isNotEmpty()) {
-            builder.setNeutralButton("Ver archivos (${reporte.archivosMultimedia.size})") { _, _ ->
-                mostrarGaleriaMultimedia(reporte)
-            }
-        }
         
         // Opciones de administrador
-        if (rolUsuario == "ADMIN") {
+        if (esAdministrador) {
             when (reporte.estado) {
-                ReporteEstado.PENDIENTE -> {
-                    // Admin puede asignar técnico (cambia a ANALISIS)
-                    builder.setPositiveButton("Asignar técnico") { _, _ ->
-                        mostrarDialogoAsignarTecnico(index)
+                "Pendiente" -> {
+                    // Admin puede cambiar a En análisis
+                    builder.setPositiveButton("Marcar en análisis") { _, _ ->
+                        mostrarDialogoCambiarEstado(reporte, "En análisis")
                     }
                 }
-                ReporteEstado.ANALISIS -> {
+                "En análisis" -> {
                     // Admin puede marcar como resuelto
-                    // TODO: VALIDACIÓN SMS REQUERIDA ANTES DE CAMBIAR ESTADO
-                    // TODO: Implementar sistema de validación por SMS con código de 4 letras + 2 números
-                    // TODO: Enviar SMS al número registrado del administrador con código de verificación
-                    // TODO: Mostrar diálogo para ingresar código de verificación antes de confirmar cambio
-                    // TODO: Validar código ingresado contra el código enviado por SMS
-                    // TODO: Si código es válido, proceder con cambio de estado
-                    // TODO: Si código es inválido, mostrar error y no permitir cambio
                     builder.setPositiveButton("Marcar como resuelto") { _, _ ->
-                        ReportesManager.actualizarEstado(index, ReporteEstado.RESUELTO)
-                        Toast.makeText(this, "✓ Reporte marcado como resuelto", Toast.LENGTH_SHORT).show()
-                        // TODO: Registrar fecha de actualización del estado
-                        // TODO: Permitir agregar comentarios/observaciones para el residente
-                        // TODO: Enviar notificación por correo electrónico al residente con:
-                        // TODO:   - Tipo de incidencia
-                        // TODO:   - Descripción del problema
-                        // TODO:   - Fecha de creación del reporte
-                        // TODO:   - Estado actualizado (RESUELTO)
-                        // TODO:   - Observaciones del administrador (si las hay)
-                        loadReportes()
+                        mostrarDialogoCambiarEstado(reporte, "Resuelto")
                     }
                 }
-                ReporteEstado.RESUELTO -> {
+                "Resuelto" -> {
                     // Reporte ya está resuelto, solo cerrar
                     builder.setPositiveButton("Cerrar", null)
                 }
@@ -269,149 +271,277 @@ class Reportes : BaseActivity() {
     }
     
     /**
-     * Muestra diálogo para asignar un técnico al reporte.
+     * Muestra diálogo para cambiar el estado del reporte.
      * Solo accesible por UsuarioAdmin.
-     * Al asignar técnico, el estado cambia automáticamente a ANALISIS.
+     * Si el estado es "En análisis", solicita la identificación del técnico.
      * 
-     * TODO: Reemplazar input de texto libre por selección de técnicos registrados en el sistema
-     * TODO: Implementar una de las siguientes opciones:
-     *       - ComboBox/Spinner con lista de técnicos disponibles (obtenidos de la base de datos)
-     *       - Campo de cédula con validación contra técnicos registrados
-     *       - Lista de técnicos con sus nombres, cédulas y especialidades
-     * TODO: Validar que el técnico seleccionado esté activo y disponible
-     * TODO: Considerar mostrar carga de trabajo actual de cada técnico
-     * 
-     * TODO: VALIDACIÓN SMS REQUERIDA ANTES DE ASIGNAR TÉCNICO
-     * TODO: Implementar sistema de validación por SMS con código de 4 letras + 2 números
-     * TODO: Enviar SMS al número registrado del administrador con código de verificación
-     * TODO: Mostrar diálogo para ingresar código de verificación antes de asignar técnico
-     * TODO: Validar código ingresado contra el código enviado por SMS
-     * TODO: Si código es válido, proceder con asignación de técnico y cambio a estado ANALISIS
-     * TODO: Si código es inválido, mostrar error y no permitir cambio
-     * 
-     * @param index Índice del reporte en la lista
+     * @param reporte El reporte a actualizar
+     * @param nuevoEstado El nuevo estado del reporte
      */
-    private fun mostrarDialogoAsignarTecnico(index: Int) {
-        // NOTA: Este es un input temporal de texto libre
-        // Debe ser reemplazado por selección de técnicos desde base de datos
+    private fun mostrarDialogoCambiarEstado(reporte: ReporteBackend, nuevoEstado: String) {
+        // Si el estado es "En análisis", mostrar diálogo de asignación de técnico
+        if (nuevoEstado == "En análisis") {
+            mostrarDialogoAsignarTecnico(reporte, nuevoEstado)
+            return
+        }
+        
+        // Para otros estados, solo pedir comentarios
         val inputEditText = EditText(this).apply {
-            hint = "Nombre del técnico"
+            hint = "Comentarios (opcional)"
             setPadding(50, 30, 50, 30)
         }
         
         AlertDialog.Builder(this)
-            .setTitle("Asignar técnico")
-            .setMessage("Ingresa el nombre del técnico a asignar.\nEl estado cambiará a 'En análisis'.")
+            .setTitle("Cambiar estado a: $nuevoEstado")
+            .setMessage("Puedes agregar comentarios sobre este cambio de estado.")
             .setView(inputEditText)
-            .setPositiveButton("Asignar") { _, _ ->
-                val nombreTecnico = inputEditText.text.toString().trim()
-                if (nombreTecnico.isNotEmpty()) {
-                    ReportesManager.asignarTecnico(index, nombreTecnico)
-                    ReportesManager.actualizarEstado(index, ReporteEstado.ANALISIS)
-                    Toast.makeText(this, "✓ Técnico asignado: $nombreTecnico", Toast.LENGTH_SHORT).show()
-                    // TODO: Registrar fecha de actualización del estado
-                    // TODO: Permitir agregar comentarios/observaciones para el residente
-                    // TODO: Enviar notificación por correo electrónico al residente con:
-                    // TODO:   - Tipo de incidencia
-                    // TODO:   - Descripción del problema
-                    // TODO:   - Fecha de creación del reporte
-                    // TODO:   - Estado actualizado (EN ANÁLISIS)
-                    // TODO:   - Nombre del técnico asignado
-                    // TODO:   - Observaciones del administrador (si las hay)
-                    loadReportes()
-                } else {
-                    Toast.makeText(this, "El nombre del técnico no puede estar vacío", Toast.LENGTH_SHORT).show()
-                }
+            .setPositiveButton("Confirmar") { _, _ ->
+                val comentarios = inputEditText.text.toString().trim()
+                
+                val request = CambiarEstadoRequest(
+                    estado = nuevoEstado,
+                    comentariosAdmin = comentarios,
+                    identificacionTecnico = null
+                )
+                
+                RetrofitClient.api.cambiarEstadoReporte(reporte.id, request).enqueue(
+                    object : retrofit2.Callback<com.example.resionemobile.api.GenericResponse> {
+                        override fun onResponse(
+                            call: retrofit2.Call<com.example.resionemobile.api.GenericResponse>,
+                            response: retrofit2.Response<com.example.resionemobile.api.GenericResponse>
+                        ) {
+                            if (response.isSuccessful) {
+                                Toast.makeText(
+                                    this@Reportes,
+                                    "✓ Estado actualizado a: $nuevoEstado",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                cargarReportesDesdeApi()
+                            } else {
+                                val errorBody = response.errorBody()?.string()
+                                Toast.makeText(
+                                    this@Reportes,
+                                    "Error: ${errorBody ?: response.message()}",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+
+                        override fun onFailure(
+                            call: retrofit2.Call<com.example.resionemobile.api.GenericResponse>,
+                            t: Throwable
+                        ) {
+                            Toast.makeText(
+                                this@Reportes,
+                                "Error de conexión: ${t.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                )
             }
             .setNegativeButton("Cancelar", null)
             .show()
     }
-    
+
     /**
-     * Muestra un diálogo con la galería de archivos multimedia del reporte.
-     * Al seleccionar un archivo, abre el visualizador o reproductor correspondiente.
+     * Muestra diálogo para asignar un técnico de mantenimiento al reporte.
+     * Solicita la identificación del técnico y valida que exista y tenga el rol correcto.
      * 
-     * @param reporte El reporte del cual mostrar los archivos
+     * @param reporte El reporte a actualizar
+     * @param nuevoEstado El nuevo estado del reporte ("En análisis")
      */
-    private fun mostrarGaleriaMultimedia(reporte: ReporteData) {
-        if (reporte.archivosMultimedia.isEmpty()) {
+    private fun mostrarDialogoAsignarTecnico(reporte: ReporteBackend, nuevoEstado: String) {
+        val dialogView = LayoutInflater.from(this).inflate(
+            android.R.layout.simple_list_item_2, null
+        ).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+        
+        val container = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(50, 30, 50, 30)
+        }
+        
+        val etIdentificacion = EditText(this).apply {
+            hint = "Identificación del técnico"
+            inputType = android.text.InputType.TYPE_CLASS_TEXT
+            setPadding(20, 20, 20, 20)
+        }
+        
+        val etComentarios = EditText(this).apply {
+            hint = "Comentarios (opcional)"
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            setPadding(20, 20, 20, 20)
+            minLines = 2
+        }
+        
+        container.addView(etIdentificacion)
+        container.addView(etComentarios)
+        
+        AlertDialog.Builder(this)
+            .setTitle("Asignar técnico de mantenimiento")
+            .setMessage("Ingrese la identificación del técnico que atenderá este reporte.\n\nEl sistema validará que la identificación exista y que el usuario tenga el rol de TECNICO_MANTENIMIENTO.")
+            .setView(container)
+            .setPositiveButton("Asignar") { _, _ ->
+                val identificacion = etIdentificacion.text.toString().trim()
+                val comentarios = etComentarios.text.toString().trim()
+                
+                if (identificacion.isEmpty()) {
+                    Toast.makeText(
+                        this,
+                        "Debe ingresar la identificación del técnico",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+                
+                // Crear request con identificación del técnico
+                val request = CambiarEstadoRequest(
+                    estado = nuevoEstado,
+                    comentariosAdmin = comentarios,
+                    identificacionTecnico = identificacion
+                )
+                
+                // Enviar petición al backend
+                RetrofitClient.api.cambiarEstadoReporte(reporte.id, request).enqueue(
+                    object : retrofit2.Callback<com.example.resionemobile.api.GenericResponse> {
+                        override fun onResponse(
+                            call: retrofit2.Call<com.example.resionemobile.api.GenericResponse>,
+                            response: retrofit2.Response<com.example.resionemobile.api.GenericResponse>
+                        ) {
+                            if (response.isSuccessful) {
+                                Toast.makeText(
+                                    this@Reportes,
+                                    "✓ Técnico asignado exitosamente\nReporte en análisis",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                cargarReportesDesdeApi()
+                            } else {
+                                // Mostrar error específico del backend
+                                val errorBody = response.errorBody()?.string()
+                                val errorMessage = try {
+                                    val jsonError = Gson().fromJson(errorBody, JsonObject::class.java)
+                                    jsonError.get("mensaje")?.asString ?: "Error desconocido"
+                                } catch (e: Exception) {
+                                    errorBody ?: "Error al procesar la respuesta"
+                                }
+                                
+                                Toast.makeText(
+                                    this@Reportes,
+                                    errorMessage,
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+
+                        override fun onFailure(
+                            call: retrofit2.Call<com.example.resionemobile.api.GenericResponse>,
+                            t: Throwable
+                        ) {
+                            Toast.makeText(
+                                this@Reportes,
+                                "Error de conexión: ${t.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                )
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    /**
+     * Muestra un diálogo con la lista de archivos adjuntos al reporte
+     */
+    private fun mostrarArchivosDialog(reporte: ReporteBackend) {
+        if (reporte.archivos.isEmpty()) {
             Toast.makeText(this, "No hay archivos adjuntos", Toast.LENGTH_SHORT).show()
             return
         }
-        
-        val items = reporte.archivosMultimedia.mapIndexed { index, uri ->
-            val mimeType = contentResolver.getType(uri)
+
+        val archivosNombres = reporte.archivos.mapIndexed { index, ruta ->
+            val nombreArchivo = ruta.substringAfterLast("/")
+            val extension = nombreArchivo.substringAfterLast(".", "")
             val tipo = when {
-                mimeType?.startsWith("image/") == true -> "Imagen"
-                mimeType?.startsWith("video/") == true -> "Video"
-                else -> "Archivo"
+                extension.lowercase() in listOf("jpg", "jpeg", "png", "gif", "bmp", "webp") -> "🖼️ Imagen"
+                extension.lowercase() in listOf("mp4", "avi", "mov", "mkv", "webm") -> "🎥 Video"
+                else -> "📄 Archivo"
             }
-            "$tipo ${index + 1}"
+            "$tipo ${index + 1}: $nombreArchivo"
         }.toTypedArray()
-        
+
         AlertDialog.Builder(this)
-            .setTitle("Archivos adjuntos (${items.size})")
-            .setItems(items) { _, which ->
-                val uri = reporte.archivosMultimedia[which]
-                val mimeType = contentResolver.getType(uri)
+            .setTitle("Archivos adjuntos (${reporte.archivos.size})")
+            .setItems(archivosNombres) { _, which ->
+                val rutaArchivo = reporte.archivos[which]
+                val nombreArchivo = rutaArchivo.substringAfterLast("/")
+                val extension = nombreArchivo.substringAfterLast(".", "").lowercase()
                 
                 when {
-                    mimeType?.startsWith("image/") == true -> {
-                        // Abrir imagen en visualizador de pantalla completa
-                        abrirVisualizadorImagen(uri)
+                    extension in listOf("jpg", "jpeg", "png", "gif", "bmp", "webp") -> {
+                        // Es una imagen, mostrar en visor de pantalla completa
+                        mostrarImagenPantallaCompleta(rutaArchivo)
                     }
-                    mimeType?.startsWith("video/") == true -> {
-                        // Abrir video en reproductor
-                        abrirReproductorVideo(uri)
+                    extension in listOf("mp4", "avi", "mov", "mkv", "webm") -> {
+                        // Es un video, abrir en reproductor
+                        reproducirVideo(rutaArchivo)
                     }
                     else -> {
-                        Toast.makeText(this, "Tipo de archivo no soportado", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this,
+                            "Tipo de archivo no soportado para visualización",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
             .setPositiveButton("Cerrar", null)
             .show()
     }
-    
+
     /**
-     * Abre un diálogo con la imagen en pantalla completa.
-     * Permite visualizar la imagen con zoom y desplazamiento.
-     * 
-     * @param imageUri URI de la imagen a mostrar
+     * Muestra una imagen en pantalla completa desde el servidor
      */
-    private fun abrirVisualizadorImagen(imageUri: Uri) {
+    private fun mostrarImagenPantallaCompleta(rutaArchivo: String) {
+        val urlCompleta = "http://10.0.2.2:5050/$rutaArchivo"
+        
         val dialogView = layoutInflater.inflate(R.layout.dialog_image_viewer, null)
         val imageView = dialogView.findViewById<ImageView>(R.id.fullscreen_image)
         
-        try {
-            imageView.setImageURI(imageUri)
-            
-            val dialog = AlertDialog.Builder(this)
-                .setView(dialogView)
-                .setPositiveButton("Cerrar", null)
-                .create()
-            
-            dialog.show()
-            
-            // Hacer la imagen responsiva al tamaño del diálogo
-            dialog.window?.setLayout(
-                (resources.displayMetrics.widthPixels * 0.95).toInt(),
-                (resources.displayMetrics.heightPixels * 0.8).toInt()
-            )
-        } catch (e: Exception) {
-            Toast.makeText(this, "Error al cargar la imagen", Toast.LENGTH_SHORT).show()
-            e.printStackTrace()
+        // Cargar imagen desde servidor usando Coil
+        imageView.load(urlCompleta) {
+            crossfade(true)
+            placeholder(android.R.drawable.ic_menu_gallery)
+            error(android.R.drawable.ic_dialog_alert)
         }
+        
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setPositiveButton("Cerrar", null)
+            .create()
+        
+        dialog.show()
+        
+        // Hacer la imagen responsiva al tamaño del diálogo
+        dialog.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.95).toInt(),
+            (resources.displayMetrics.heightPixels * 0.8).toInt()
+        )
     }
-    
+
     /**
-     * Abre el reproductor de video nativo del sistema para reproducir el video.
-     * Utiliza un Intent con ACTION_VIEW para abrir la aplicación de video predeterminada.
-     * 
-     * @param videoUri URI del video a reproducir
+     * Reproduce un video desde el servidor usando el reproductor del sistema
      */
-    private fun abrirReproductorVideo(videoUri: Uri) {
+    private fun reproducirVideo(rutaArchivo: String) {
         try {
+            val urlCompleta = "http://10.0.2.2:5050/$rutaArchivo"
+            val videoUri = Uri.parse(urlCompleta)
+            
             val intent = Intent(Intent.ACTION_VIEW).apply {
                 setDataAndType(videoUri, "video/*")
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -420,20 +550,19 @@ class Reportes : BaseActivity() {
             if (intent.resolveActivity(packageManager) != null) {
                 startActivity(intent)
             } else {
-                Toast.makeText(this, "No se encontró una aplicación para reproducir videos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "No se encontró una aplicación para reproducir videos",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         } catch (e: Exception) {
-            Toast.makeText(this, "Error al abrir el video", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                "Error al abrir el video: ${e.message}",
+                Toast.LENGTH_SHORT
+            ).show()
             e.printStackTrace()
         }
     }
-}
-
-/**
- * Enum que representa los posibles estados de un reporte.
- */
-enum class ReporteEstado {
-    PENDIENTE,  // Rojo - Reporte nuevo sin revisar
-    ANALISIS,   // Azul - Reporte en proceso de revisión
-    RESUELTO    // Verde - Reporte completado
 }

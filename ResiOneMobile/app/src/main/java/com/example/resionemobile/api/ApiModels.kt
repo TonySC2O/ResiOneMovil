@@ -243,3 +243,50 @@ data class MantenimientoResponse(
 data class HistorialManteResponse(
     val mantenimientos: List<BitacoraMantenimiento>
 )
+
+
+// ===== REPORTES =====
+
+data class ReporteBackend(
+    @SerializedName("_id") val id: String,
+    val tipo: String,
+    val descripcion: String,
+    val nivelPrioridad: String,
+    val archivos: List<String>,
+    val fecha: String,
+    val estado: String,
+    val seguimiento: String,
+    val comentariosAdmin: String,
+    val tecnicoAsignado: String,
+    val residenteCorreo: String,
+    val residenteNombre: String,
+    val residenteApartamento: String?,
+    val residenteIdentificacion: String?
+)
+
+data class CrearReporteRequest(
+    val tipo: String,
+    val descripcion: String,
+    val nivelPrioridad: String,
+    val archivos: List<String>,
+    val fecha: String,
+    val residenteCorreo: String,
+    val residenteNombre: String,
+    val residenteApartamento: String?,
+    val residenteIdentificacion: String?
+)
+
+data class CrearReporteResponse(
+    val mensaje: String,
+    val reporte: ReporteBackend
+)
+
+data class ReportesListResponse(
+    val reportes: List<ReporteBackend>
+)
+
+data class CambiarEstadoRequest(
+    val estado: String,
+    val comentariosAdmin: String,
+    val identificacionTecnico: String? = null
+)

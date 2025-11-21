@@ -9,7 +9,8 @@ const usuarioSchema = new mongoose.Schema({
   apartamento: { type: String, required: true },
   habitantes: { type: Number, required: true, min: 1 },
   esAdministrador: { type: Boolean, default: false },
-  codigoEmpleado: { type: String, required: function () { return this.esAdministrador; }, match: /^[A-Za-z]{4}\d{2}$/ }
+  codigoEmpleado: { type: String, required: function () { return this.esAdministrador; }, match: /^[A-Za-z]{4}\d{2}$/ },
+  rol: { type: String, required: true, enum: ['RESIDENTE', 'ADMIN', 'TECNICO_MANTENIMIENTO', 'AUXILIAR_SEGURIDAD'], default: 'RESIDENTE' }
 });
 
 module.exports = mongoose.model('Usuario', usuarioSchema);

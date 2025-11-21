@@ -29,7 +29,7 @@ class PerfilView : BaseActivity() {
         // Toolbar (usar el ID 'toolbar' del XML)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        binding.toolbar.setNavigationOnClickListener { onBackPressed() }
+        binding.toolbar.setNavigationOnClickListener { finish() }
 
         // Botones
         binding.btnBack.setOnClickListener { finish() }
