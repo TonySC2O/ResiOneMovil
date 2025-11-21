@@ -87,12 +87,6 @@ class AdminReservas : BaseActivity() {
             updateMonthLabel()
             generateMonthDays()
         }
-        
-        // ============ CONFIGURACIÓN DEL BOTÓN DE CAMBIO DE USUARIO ============
-        setupUserSwitchButton(R.id.btn_switch_user) {
-            // Recargar solicitudes cuando cambia el usuario
-            loadSolicitudesPendientes()
-        }
     }
     
     override fun onResume() {

@@ -1,4 +1,4 @@
-package com.example.resionemobile.registro
+package Registro
 
 import android.content.Context
 import android.os.Bundle
@@ -12,13 +12,13 @@ import com.example.resionemobile.databinding.ActivityPerfilBinding
 import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
+import com.example.resionemobile.BaseActivity
 import retrofit2.Response
 
-class PerfilView : AppCompatActivity() {
+class PerfilView : BaseActivity() {
 
     private lateinit var binding: ActivityPerfilBinding
     private val gson = Gson()
-    private var currentUser: UsuarioData? = null
     private var editing = false
 
     override fun onCreate(savedInstanceState: Bundle?) {

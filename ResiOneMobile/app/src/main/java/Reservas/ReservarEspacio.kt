@@ -312,7 +312,7 @@ class ReservarEspacio : BaseActivity() {
             }
 
             // Todas las validaciones pasaron — preparar la reserva con el creador actual. IMPORTANTE CAMBIARLO A BASE DE DATOS EN MONGODB
-            val reserva = ReservaLight(espacio, fechaDate, horaInicio, horaFinal, cantidad, currentUser)
+            val reserva = ReservaLight(espacio, fechaDate, horaInicio, horaFinal, cantidad, currentUser?.nombre ?: "Residente Anónimo")
 
             // ============ DETECCIÓN DE CONFLICTOS DE HORARIO ============
             // Verificar si existe solapamiento con otras reservas en el mismo día y espacio
@@ -361,7 +361,7 @@ class ReservarEspacio : BaseActivity() {
             // Crear solicitud pendiente (ya no se guarda directamente como reserva)
             val solicitud = SolicitudReserva(
                 espacio = espacio,
-                residente = currentUser,
+                residente = currentUser?.nombre ?: "Residente",
                 fecha = fechaDate,
                 horaInicio = calInicio.time,
                 horaFin = calFin.time,
@@ -383,11 +383,6 @@ class ReservarEspacio : BaseActivity() {
             // Refrescar colores del calendario para mostrar solicitudes pendientes
             adapter.updateDays(generateMonthDays(currentMonthCalendar))
         }
-
-        // ============ CONFIGURACIÓN DEL BOTÓN DE CAMBIO DE USUARIO (SIMULACIÓN) ============
-        // Configurar botón de simulación de cambio de usuario heredado de BaseActivity
-        // NOTA: Este botón es SOLO para testing y debe ser removido en producción
-        setupUserSwitchButton(R.id.btn_switch_user)
     }
 
     /**
@@ -489,8 +484,10 @@ class ReservarEspacio : BaseActivity() {
         details.append("Hora de reserva: ${reserva.horaInicio} - ${reserva.horaFinal}\n")
         details.append("Cantidad de personas: ${reserva.cantidad}\n")
 
-        // Verificar permisos: solo el creador o UsuarioAdmin pueden modificar
-        val canModify = (currentUser == reserva.creador || currentUser == "UsuarioAdmin")
+        val esElCreador = currentUser?.correo == reserva.creador ||
+                currentUser?.nombre == reserva.creador
+
+        val canModify = esElCreador || esAdministrador
 
         val builder = AlertDialog.Builder(this)
             .setTitle("Detalle de reserva")

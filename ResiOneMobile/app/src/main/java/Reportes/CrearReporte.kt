@@ -125,7 +125,7 @@ class CrearReporte : BaseActivity() {
                 prioridad = prioridad,
                 fecha = selectedDate!!,
                 archivosMultimedia = attachedUris.toList(),
-                creador = currentUser,  // Usuario que crea el reporte
+                creador = currentUser?.nombre?:"Residente",  // Usuario que crea el reporte
                 estado = ReporteEstado.PENDIENTE,
                 tecnicoAsignado = null  // Sin técnico al crear
             )
@@ -140,16 +140,8 @@ class CrearReporte : BaseActivity() {
             selectedDate = null
             attachedUris.clear()
             showThumbnails()
-            
-            // Opcional: navegar a la pantalla de Ver Reportes
-            // val intent = Intent(this, Reportes::class.java)
-            // startActivity(intent)
+
         }
-        
-        // ============ CONFIGURACIÓN DEL BOTÓN DE CAMBIO DE USUARIO (SIMULACIÓN) ============
-        // Configurar botón de simulación de cambio de usuario heredado de BaseActivity
-        // NOTA: Este botón es SOLO para testing y debe ser removido en producción
-        setupUserSwitchButton(R.id.btn_switch_user_reporte)
     }
 
     private fun showThumbnails() {

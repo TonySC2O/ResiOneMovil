@@ -57,13 +57,7 @@ class Reportes : BaseActivity() {
         // Cargar reportes desde ReportesManager
         loadReportes()
         
-        // ============ CONFIGURACIÓN DEL BOTÓN DE CAMBIO DE USUARIO (SIMULACIÓN) ============
-        // Configurar botón de simulación de cambio de usuario heredado de BaseActivity
-        // Al cambiar usuario, recarga los reportes para actualizar permisos visibles
-        // NOTA: Este botón es SOLO para testing y debe ser removido en producción
-        setupUserSwitchButton(R.id.btn_switch_user_reportes) {
-            loadReportes()  // Recargar reportes cuando cambia el usuario
-        }
+
     }
     
     override fun onResume() {
@@ -231,7 +225,7 @@ class Reportes : BaseActivity() {
         }
         
         // Opciones de administrador
-        if (currentUser == "UsuarioAdmin") {
+        if (rolUsuario == "ADMIN") {
             when (reporte.estado) {
                 ReporteEstado.PENDIENTE -> {
                     // Admin puede asignar técnico (cambia a ANALISIS)

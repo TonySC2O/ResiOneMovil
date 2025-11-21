@@ -10,7 +10,7 @@ import com.example.resionemobile.R
 import com.example.resionemobile.api.Comunicado
 
 class ComunicadosAdapter(
-    private var items: MutableList<Comunicado>,
+    private val items: MutableList<Comunicado>,
     private val onEdit: (Comunicado) -> Unit,
     private val onDelete: (Comunicado) -> Unit
 ) : RecyclerView.Adapter<ComunicadosAdapter.VH>() {
@@ -23,19 +23,14 @@ class ComunicadosAdapter(
         val btnDelete: ImageButton = view.findViewById(R.id.btn_delete)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val v = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_post, parent, false)
-        return VH(v)
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+        VH(LayoutInflater.from(parent.context).inflate(R.layout.item_post, parent, false))
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val c = items[position]
-
-        holder.tvTitulo.text = c.titulo ?: "Comunicado"
+        holder.tvTitulo.text = c.titulo ?: "Sin título"
         holder.tvContenido.text = c.contenido
-        holder.tvFecha.text = formatDate(c.fechaPublicacion)
-
+        holder.tvFecha.text = c.fechaPublicacion ?: ""
         holder.btnEdit.setOnClickListener { onEdit(c) }
         holder.btnDelete.setOnClickListener { onDelete(c) }
     }
@@ -54,23 +49,18 @@ class ComunicadosAdapter(
     }
 
     fun removeComunicado(c: Comunicado) {
-        val idx = items.indexOfFirst { it.id == c.id }
-        if (idx != -1) {
-            items.removeAt(idx)
-            notifyItemRemoved(idx)
+        val index = items.indexOfFirst { it.id == c.id }
+        if (index != -1) {
+            items.removeAt(index)
+            notifyItemRemoved(index)
         }
     }
 
     fun updateSingle(updated: Comunicado) {
-        val idx = items.indexOfFirst { it.id == updated.id }
-        if (idx != -1) {
-            items[idx] = updated
-            notifyItemChanged(idx)
+        val index = items.indexOfFirst { it.id == updated.id }
+        if (index != -1) {
+            items[index] = updated
+            notifyItemChanged(index)
         }
-    }
-
-    // Ahora trabaja con String
-    private fun formatDate(dateString: String?): String {
-        return dateString ?: ""
     }
 }
