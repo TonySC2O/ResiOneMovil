@@ -110,4 +110,36 @@ interface ApiService {
         @Path("id") id: String,
         @Body body: CambiarEstadoRequest
     ): Call<GenericResponse>
+
+    // ===== RESERVAS =====
+    
+    @GET("reservas/")
+    fun obtenerReservas(
+        @Query("estado") estado: String? = null,
+        @Query("residenteCorreo") residenteCorreo: String? = null
+    ): Call<List<ReservaBackend>>
+
+    @POST("reservas/")
+    fun crearReserva(@Body body: CrearReservaRequest): Call<CrearReservaResponse>
+
+    @PUT("reservas/{id}/aprobar")
+    fun aprobarReserva(
+        @Path("id") id: String,
+        @Body body: AprobarReservaRequest
+    ): Call<AprobarReservaResponse>
+
+    @DELETE("reservas/{id}/rechazar")
+    fun rechazarReserva(
+        @Path("id") id: String,
+        @Body body: RechazarReservaRequest
+    ): Call<RechazarReservaResponse>
+
+    @PUT("reservas/{id}")
+    fun actualizarReserva(
+        @Path("id") id: String,
+        @Body body: ActualizarReservaRequest
+    ): Call<ActualizarReservaResponse>
+
+    @DELETE("reservas/{id}")
+    fun eliminarReserva(@Path("id") id: String): Call<GenericResponse>
 }

@@ -2,76 +2,64 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.resionemobile.MainActivity">
-
     <item
         android:id="@+id/action_inicio"
         android:orderInCategory="1"
         android:title="Inicio"
         app:showAsAction="never" />
-
     <item
         android:id="@+id/action_perfil"
         android:orderInCategory="2"
         android:title="Modificar Usuario"
         app:showAsAction="never" />
-
     <item
         android:id="@+id/action_comunicados"
         android:orderInCategory="3"
         android:title="Comunicados"
         app:showAsAction="never" />
-
     <item
         android:id="@+id/action_reservas"
         android:orderInCategory="4"
         android:title="Reservas de Espacios"
         app:showAsAction="never" />
-
     <item
         android:id="@+id/action_admin_reservas"
         android:orderInCategory="5"
         android:title="Gestionar Reservas"
         android:visible="false"
         app:showAsAction="never" />
-
     <item
         android:id="@+id/action_ver_reportes"
         android:orderInCategory="6"
         android:title="Ver Reportes"
         app:showAsAction="never" />
-
     <item
         android:id="@+id/action_reportes"
         android:orderInCategory="7"
         android:title="Crear Reportes"
         app:showAsAction="never" />
-
     <item
         android:id="@+id/action_seguridad"
         android:orderInCategory="8"
         android:title="Seguridad"
         android:visible="false"
         app:showAsAction="never" />
-
     <item
         android:id="@+id/action_mantenimiento"
         android:orderInCategory="9"
         android:title="Mantenimiento"
         android:visible="false"
         app:showAsAction="never" />
-
     <item
         android:id="@+id/action_finanzas"
         android:orderInCategory="10"
         android:title="Finanzas"
         app:showAsAction="never" />
-
     <item
         android:id="@+id/action_chatbot"
         android:orderInCategory="11"
         android:title="ChatBot"
         app:showAsAction="never" />
-
     <item
         android:id="@+id/action_salir"
         android:orderInCategory="12"
